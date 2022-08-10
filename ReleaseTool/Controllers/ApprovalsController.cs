@@ -86,10 +86,14 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<Approval>> PostApproval(Approval approval)
         {
-          if (_context.Approvals == null)
-          {
-              return Problem("Entity set 'ReleaseToolContext.Approval'  is null.");
-          }
+            if (_context.Approvals == null)
+            { 
+                return Problem("Entity set 'ReleaseToolContext.Approval'  is null.");
+            }
+            if (!ChangeRequestExists(approval.ChangeRequestId))
+            {
+                return BadRequest("Change request not found.");
+            }
             _context.Approvals.Add(approval);
             await _context.SaveChangesAsync();
 
@@ -119,6 +123,11 @@ namespace ReleaseTool.Controllers
         private bool ApprovalExists(int id)
         {
             return (_context.Approvals?.Any(e => e.ApprovalId == id)).GetValueOrDefault();
+        }
+
+        private bool ChangeRequestExists(int id)
+        {
+            return (_context.ChangeRequests?.Any(x => x.ChangeRequestId == id)).GetValueOrDefault();
         }
     }
 }
