@@ -29,10 +29,10 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tag>>> GetTag()
         {
-          if (_context.Tags == null)
-          {
-              return NotFound();
-          }
+            if (_context.Tags == null)
+            {
+                return NotFound();
+            }
             return await _context.Tags.ToListAsync();
         }
 
@@ -40,10 +40,10 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Tag>> GetTag(int id)
         {
-          if (_context.Tags == null)
-          {
-              return NotFound();
-          }
+            if (_context.Tags == null)
+            {
+                return NotFound();
+            }
             var tag = await _context.Tags.FindAsync(id);
 
             if (tag == null)

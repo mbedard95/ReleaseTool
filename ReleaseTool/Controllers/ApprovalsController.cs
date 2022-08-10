@@ -25,10 +25,10 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Approval>>> GetApproval()
         {
-          if (_context.Approvals == null)
-          {
-              return NotFound();
-          }
+            if (_context.Approvals == null)
+            {
+                return NotFound();
+            }
             return await _context.Approvals.ToListAsync();
         }
 
@@ -36,10 +36,10 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Approval>> GetApproval(int id)
         {
-          if (_context.Approvals == null)
-          {
-              return NotFound();
-          }
+            if (_context.Approvals == null)
+            {
+                return NotFound();
+            }
             var approval = await _context.Approvals.FindAsync(id);
 
             if (approval == null)

@@ -2,7 +2,7 @@
 
 namespace ReleaseTool.Features.Change_Requests.Models.Dtos
 {
-    public class WriteChangeRequetDto
+    public class WriteChangeRequestDto
     {
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";

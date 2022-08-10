@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using ReleaseTool.Features.Comments.Models.DataAccess;
+using ReleaseTool.Features.Comments.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.DataAccess;
@@ -18,6 +20,8 @@ namespace ReleaseTool
             CreateMap<User, ReadUserDto>();
 
             CreateMap<WriteTagDto, Tag>();
+
+            CreateMap<WriteCommentDto, Comment>();
         }
 
         private string HashPassword(string pw)

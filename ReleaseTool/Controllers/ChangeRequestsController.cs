@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
+using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -15,20 +17,22 @@ namespace ReleaseTool.Controllers
     public class ChangeRequestsController : ControllerBase
     {
         private readonly ReleaseToolContext _context;
+        private readonly IMapper _mapper;
 
-        public ChangeRequestsController(ReleaseToolContext context)
+        public ChangeRequestsController(ReleaseToolContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/ChangeRequests
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChangeRequest>>> GetChangeRequest()
         {
-          if (_context.ChangeRequests == null)
-          {
-              return NotFound();
-          }
+            if (_context.ChangeRequests == null)
+            {
+                return NotFound();
+            }
             return await _context.ChangeRequests.ToListAsync();
         }
 
@@ -36,10 +40,10 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ChangeRequest>> GetChangeRequest(int id)
         {
-          if (_context.ChangeRequests == null)
-          {
-              return NotFound();
-          }
+            if (_context.ChangeRequests == null)
+            {
+                return NotFound();
+            }
             var changeRequest = await _context.ChangeRequests.FindAsync(id);
 
             if (changeRequest == null)
@@ -82,14 +86,21 @@ namespace ReleaseTool.Controllers
         }
 
         // POST: api/ChangeRequests
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ChangeRequest>> PostChangeRequest(ChangeRequest changeRequest)
+        public async Task<ActionResult<ChangeRequest>> PostChangeRequest(WriteChangeRequestDto dto)
         {
-          if (_context.ChangeRequests == null)
-          {
-              return Problem("Entity set 'ReleaseToolContext.ChangeRequest'  is null.");
-          }
+            if (_context.ChangeRequests == null)
+            {
+                return Problem("Entity set 'ReleaseToolContext.ChangeRequest'  is null.");
+            }
+
+            if (!UserExists(dto.UserId))
+            {
+                return BadRequest("User not found.");
+            }
+
+            var changeRequest = _mapper.Map<ChangeRequest>(dto);
+
             _context.ChangeRequests.Add(changeRequest);
             await _context.SaveChangesAsync();
 
@@ -119,6 +130,11 @@ namespace ReleaseTool.Controllers
         private bool ChangeRequestExists(int id)
         {
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
+        }
+
+        private bool UserExists(int id)
+        {
+            return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }

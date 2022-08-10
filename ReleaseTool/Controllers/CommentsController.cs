@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Comments.Models.DataAccess;
+using ReleaseTool.Features.Comments.Models.Dtos;
 
 namespace ReleaseTool.Controllers
 {
@@ -15,20 +17,22 @@ namespace ReleaseTool.Controllers
     public class CommentsController : ControllerBase
     {
         private readonly ReleaseToolContext _context;
+        private readonly IMapper _mapper;
 
-        public CommentsController(ReleaseToolContext context)
+        public CommentsController(ReleaseToolContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Comments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComment()
         {
-          if (_context.Comments == null)
-          {
-              return NotFound();
-          }
+            if (_context.Comments == null)
+            {
+                return NotFound();
+            }
             return await _context.Comments.ToListAsync();
         }
 
@@ -36,10 +40,10 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Comment>> GetComment(int id)
         {
-          if (_context.Comments == null)
-          {
-              return NotFound();
-          }
+            if (_context.Comments == null)
+            {
+                return NotFound();
+            }
             var comment = await _context.Comments.FindAsync(id);
 
             if (comment == null)
@@ -82,14 +86,26 @@ namespace ReleaseTool.Controllers
         }
 
         // POST: api/Comments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Comment>> PostComment(Comment comment)
+        public async Task<ActionResult<Comment>> PostComment(WriteCommentDto dto)
         {
-          if (_context.Comments == null)
-          {
-              return Problem("Entity set 'ReleaseToolContext.Comment'  is null.");
-          }
+            if (_context.Comments == null)
+            {
+                return Problem("Entity set 'ReleaseToolContext.Comment'  is null.");
+            }
+
+            if (!ChangeRequestExists(dto.ChangeRequestId))
+            {
+                return BadRequest("Change request not found.");
+            }
+            if (!UserExists(dto.UserId))
+            {
+                return BadRequest("User not found.");
+            }
+
+            var comment = _mapper.Map<Comment>(dto);
+            comment.Created = DateTime.Now;
+
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
@@ -119,6 +135,16 @@ namespace ReleaseTool.Controllers
         private bool CommentExists(int id)
         {
             return (_context.Comments?.Any(e => e.CommentId == id)).GetValueOrDefault();
+        }
+
+        private bool ChangeRequestExists(int id)
+        {
+            return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
+        }
+
+        private bool UserExists(int id)
+        { 
+            return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }
