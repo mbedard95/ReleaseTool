@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.DataAccess;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -24,22 +25,22 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChangeRequest>>> GetChangeRequest()
         {
-          if (_context.ChangeRequest == null)
+          if (_context.ChangeRequests == null)
           {
               return NotFound();
           }
-            return await _context.ChangeRequest.ToListAsync();
+            return await _context.ChangeRequests.ToListAsync();
         }
 
         // GET: api/ChangeRequests/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ChangeRequest>> GetChangeRequest(int id)
         {
-          if (_context.ChangeRequest == null)
+          if (_context.ChangeRequests == null)
           {
               return NotFound();
           }
-            var changeRequest = await _context.ChangeRequest.FindAsync(id);
+            var changeRequest = await _context.ChangeRequests.FindAsync(id);
 
             if (changeRequest == null)
             {
@@ -85,11 +86,11 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<ChangeRequest>> PostChangeRequest(ChangeRequest changeRequest)
         {
-          if (_context.ChangeRequest == null)
+          if (_context.ChangeRequests == null)
           {
               return Problem("Entity set 'ReleaseToolContext.ChangeRequest'  is null.");
           }
-            _context.ChangeRequest.Add(changeRequest);
+            _context.ChangeRequests.Add(changeRequest);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, changeRequest);
@@ -99,17 +100,17 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChangeRequest(int id)
         {
-            if (_context.ChangeRequest == null)
+            if (_context.ChangeRequests == null)
             {
                 return NotFound();
             }
-            var changeRequest = await _context.ChangeRequest.FindAsync(id);
+            var changeRequest = await _context.ChangeRequests.FindAsync(id);
             if (changeRequest == null)
             {
                 return NotFound();
             }
 
-            _context.ChangeRequest.Remove(changeRequest);
+            _context.ChangeRequests.Remove(changeRequest);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -117,7 +118,7 @@ namespace ReleaseTool.Controllers
 
         private bool ChangeRequestExists(int id)
         {
-            return (_context.ChangeRequest?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
+            return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
         }
     }
 }

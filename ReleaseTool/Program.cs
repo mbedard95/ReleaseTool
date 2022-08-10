@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ReleaseTool.Models;
 using Microsoft.Extensions.Configuration;
 using System.Configuration;
+using ReleaseTool.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +13,7 @@ builder.Services.AddDbContext<ReleaseToolContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 

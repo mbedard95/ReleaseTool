@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.DataAccess;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -24,22 +25,22 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ChangeRequestTag>>> GetChangeRequestTag()
         {
-          if (_context.ChangeRequestTag == null)
+          if (_context.ChangeRequestTags == null)
           {
               return NotFound();
           }
-            return await _context.ChangeRequestTag.ToListAsync();
+            return await _context.ChangeRequestTags.ToListAsync();
         }
 
         // GET: api/ChangeRequestTags/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ChangeRequestTag>> GetChangeRequestTag(int id)
         {
-          if (_context.ChangeRequestTag == null)
+          if (_context.ChangeRequestTags == null)
           {
               return NotFound();
           }
-            var changeRequestTag = await _context.ChangeRequestTag.FindAsync(id);
+            var changeRequestTag = await _context.ChangeRequestTags.FindAsync(id);
 
             if (changeRequestTag == null)
             {
@@ -85,11 +86,11 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<ChangeRequestTag>> PostChangeRequestTag(ChangeRequestTag changeRequestTag)
         {
-          if (_context.ChangeRequestTag == null)
+          if (_context.ChangeRequestTags == null)
           {
               return Problem("Entity set 'ReleaseToolContext.ChangeRequestTag'  is null.");
           }
-            _context.ChangeRequestTag.Add(changeRequestTag);
+            _context.ChangeRequestTags.Add(changeRequestTag);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetChangeRequestTag", new { id = changeRequestTag.ChangeRequestTagId }, changeRequestTag);
@@ -99,17 +100,17 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChangeRequestTag(int id)
         {
-            if (_context.ChangeRequestTag == null)
+            if (_context.ChangeRequestTags == null)
             {
                 return NotFound();
             }
-            var changeRequestTag = await _context.ChangeRequestTag.FindAsync(id);
+            var changeRequestTag = await _context.ChangeRequestTags.FindAsync(id);
             if (changeRequestTag == null)
             {
                 return NotFound();
             }
 
-            _context.ChangeRequestTag.Remove(changeRequestTag);
+            _context.ChangeRequestTags.Remove(changeRequestTag);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -117,7 +118,7 @@ namespace ReleaseTool.Controllers
 
         private bool ChangeRequestTagExists(int id)
         {
-            return (_context.ChangeRequestTag?.Any(e => e.ChangeRequestTagId == id)).GetValueOrDefault();
+            return (_context.ChangeRequestTags?.Any(e => e.ChangeRequestTagId == id)).GetValueOrDefault();
         }
     }
 }

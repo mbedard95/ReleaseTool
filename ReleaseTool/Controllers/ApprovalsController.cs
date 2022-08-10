@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.DataAccess;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -24,22 +25,22 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Approval>>> GetApproval()
         {
-          if (_context.Approval == null)
+          if (_context.Approvals == null)
           {
               return NotFound();
           }
-            return await _context.Approval.ToListAsync();
+            return await _context.Approvals.ToListAsync();
         }
 
         // GET: api/Approvals/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Approval>> GetApproval(int id)
         {
-          if (_context.Approval == null)
+          if (_context.Approvals == null)
           {
               return NotFound();
           }
-            var approval = await _context.Approval.FindAsync(id);
+            var approval = await _context.Approvals.FindAsync(id);
 
             if (approval == null)
             {
@@ -85,11 +86,11 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<Approval>> PostApproval(Approval approval)
         {
-          if (_context.Approval == null)
+          if (_context.Approvals == null)
           {
               return Problem("Entity set 'ReleaseToolContext.Approval'  is null.");
           }
-            _context.Approval.Add(approval);
+            _context.Approvals.Add(approval);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetApproval", new { id = approval.ApprovalId }, approval);
@@ -99,17 +100,17 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApproval(int id)
         {
-            if (_context.Approval == null)
+            if (_context.Approvals == null)
             {
                 return NotFound();
             }
-            var approval = await _context.Approval.FindAsync(id);
+            var approval = await _context.Approvals.FindAsync(id);
             if (approval == null)
             {
                 return NotFound();
             }
 
-            _context.Approval.Remove(approval);
+            _context.Approvals.Remove(approval);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -117,7 +118,7 @@ namespace ReleaseTool.Controllers
 
         private bool ApprovalExists(int id)
         {
-            return (_context.Approval?.Any(e => e.ApprovalId == id)).GetValueOrDefault();
+            return (_context.Approvals?.Any(e => e.ApprovalId == id)).GetValueOrDefault();
         }
     }
 }
