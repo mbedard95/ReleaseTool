@@ -96,7 +96,7 @@ namespace ReleaseTool.Controllers
                 return Problem("Entity set 'ReleaseToolContext.Users' is null.");
             }
 
-            if (UserNameExists(dto.Username))
+            if (EmailExists(dto.EmailAddress))
             {
                 return BadRequest("Username already exists.");
             }
@@ -105,7 +105,6 @@ namespace ReleaseTool.Controllers
             
             newUser.UserStatus = UserStatus.Active;
             newUser.Created = DateTime.Now;
-            newUser.Password = HashPassword(dto.Password);
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
@@ -140,16 +139,9 @@ namespace ReleaseTool.Controllers
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
 
-        private bool UserNameExists(string name)
+        private bool EmailExists(string email)
         {
-            return (_context.Users?.Any(x => x.Username == name)).GetValueOrDefault();
-        }
-
-        private string HashPassword(string pw)
-        {
-            var hash = new SHA256Managed();
-            byte[] crypto = hash.ComputeHash(Encoding.UTF8.GetBytes(pw));
-            return Convert.ToBase64String(crypto);
-        }
+            return (_context.Users?.Any(x => x.EmailAddress == email)).GetValueOrDefault();
+        }      
     }
 }

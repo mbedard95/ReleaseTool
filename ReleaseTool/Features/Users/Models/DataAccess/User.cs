@@ -8,7 +8,7 @@ namespace ReleaseTool.Features.Users.Models.DataAccess
     {
         public int UserId { get; set; }
         [Required]
-        public string Username { get; set; } = "";
+        public string EmailAddress { get; set; } = "";
         [Required]
         public string Password { get; set; } = "";
         [Required]
@@ -16,9 +16,7 @@ namespace ReleaseTool.Features.Users.Models.DataAccess
         [Required]
         public string LastName { get; set; } = "";
         [Required]
-        public UserStatus UserStatus { get; set; }
-        [Required]
-        public string EmailAddress { get; set; } = "";
+        public UserStatus UserStatus { get; set; }       
         [Required]
         public DateTime Created { get; set; }
         [Required]

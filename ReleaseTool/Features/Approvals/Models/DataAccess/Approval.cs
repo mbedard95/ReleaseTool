@@ -17,6 +17,6 @@ namespace ReleaseTool.Features.Approvals.Models.DataAccess
         public string EmailAddress { get; set; } = "";
         [Required]
         public DateTime Created { get; set; }
-        public DateTime ApprovedDate { get; set; }
+        public DateTime? ApprovedDate { get; set; }
     }
 }
