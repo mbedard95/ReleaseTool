@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
-using ReleaseTool.Models;
-using ReleaseTool.Models.Enums;
+using ReleaseTool.Features.Users.Models.DataAccess;
+using ReleaseTool.Features.Users.Models.Dtos;
 using XSystem.Security.Cryptography;
 
 namespace ReleaseTool.Controllers
@@ -29,19 +29,19 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ViewUserDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetUsers()
         {
           if (_context.Users == null)
           {
               return NotFound();
           }
             var users = await _context.Users.ToListAsync();
-            return users.Select(x => _mapper.Map<ViewUserDto>(x)).ToList();
+            return users.Select(x => _mapper.Map<ReadUserDto>(x)).ToList();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ViewUserDto>> GetUser(int id)
+        public async Task<ActionResult<ReadUserDto>> GetUser(int id)
         {
           if (_context.Users == null)
           {
@@ -54,7 +54,7 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            return _mapper.Map<ViewUserDto>(user);
+            return _mapper.Map<ReadUserDto>(user);
         }
 
         // PUT: api/Users/5
@@ -110,7 +110,7 @@ namespace ReleaseTool.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            var viewUser = _mapper.Map<ViewUserDto>(newUser);
+            var viewUser = _mapper.Map<ReadUserDto>(newUser);
 
             return CreatedAtAction("GetUser", new { id = newUser.UserId }, viewUser);
         }

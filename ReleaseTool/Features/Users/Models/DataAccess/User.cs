@@ -1,8 +1,7 @@
-﻿using ReleaseTool.Models.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ReleaseTool.Models
+namespace ReleaseTool.Features.Users.Models.DataAccess
 {
     [Table("Users")]
     public class User

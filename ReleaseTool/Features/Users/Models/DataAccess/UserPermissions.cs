@@ -1,4 +1,4 @@
-﻿namespace ReleaseTool.Models.Enums
+﻿namespace ReleaseTool.Features.Users.Models.DataAccess
 {
     [Flags]
     public enum UserPermissions

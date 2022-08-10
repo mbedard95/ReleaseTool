@@ -1,6 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 using ReleaseTool.Models;
+using ReleaseTool.Features.Users.Models.DataAccess;
+using ReleaseTool.Features.Approvals.Models.DataAccess;
+using ReleaseTool.Features.Tags.Models.DataAccess;
+using ReleaseTool.Features.Comments.Models.DataAccess;
 
 namespace ReleaseTool.DataAccess
 {

@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
-using ReleaseTool.Models;
+using ReleaseTool.Features.Tags.Models.DataAccess;
+using ReleaseTool.Features.Tags.Models.Dtos;
+using ReleaseTool.Features.Users.Models.DataAccess;
+using ReleaseTool.Features.Users.Models.Dtos;
 using System.Text;
 using XSystem.Security.Cryptography;
 
@@ -12,7 +15,9 @@ namespace ReleaseTool
             CreateMap<WriteUserDto, User>()
                 .ForMember(dest => dest.Password, opts => opts.MapFrom(src => HashPassword(src.Password))); ;
 
-            CreateMap<User, ViewUserDto>();
+            CreateMap<User, ReadUserDto>();
+
+            CreateMap<WriteTagDto, Tag>();
         }
 
         private string HashPassword(string pw)

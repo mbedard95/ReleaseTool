@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ReleaseTool.Models   
+namespace ReleaseTool.Features.Comments.Models.DataAccess
 {
     [Table("Comments")]
     public class Comment

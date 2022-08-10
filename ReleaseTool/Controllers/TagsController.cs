@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
-using ReleaseTool.Models;
+using ReleaseTool.Features.Tags.Models.DataAccess;
+using ReleaseTool.Features.Tags.Models.Dtos;
 
 namespace ReleaseTool.Controllers
 {
@@ -15,10 +17,12 @@ namespace ReleaseTool.Controllers
     public class TagsController : ControllerBase
     {
         private readonly ReleaseToolContext _context;
+        private readonly IMapper _mapper;
 
-        public TagsController(ReleaseToolContext context)
+        public TagsController(ReleaseToolContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Tags
@@ -84,16 +88,20 @@ namespace ReleaseTool.Controllers
         // POST: api/Tags
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Tag>> PostTag(Tag tag)
+        public async Task<ActionResult<Tag>> PostTag(WriteTagDto dto)
         {
-          if (_context.Tags == null)
-          {
-              return Problem("Entity set 'ReleaseToolContext.Tag'  is null.");
-          }
-          if (TagNameExists(tag.Name))
+            if (_context.Tags == null)
+            {
+                return Problem("Entity set 'ReleaseToolContext.Tag'  is null.");
+            }
+            if (TagNameExists(dto.Name))
             {
                 return BadRequest("Tag name already exists.");
             }
+
+            var tag = _mapper.Map<Tag>(dto);
+            tag.Created = DateTime.Now;
+
             _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
 

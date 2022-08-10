@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ReleaseTool.Models
+namespace ReleaseTool.Features.Tags.Models.DataAccess
 {
     [Table("ChangeRequestTags")]
     public class ChangeRequestTag

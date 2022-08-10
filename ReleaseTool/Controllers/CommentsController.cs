@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
-using ReleaseTool.Models;
+using ReleaseTool.Features.Comments.Models.DataAccess;
 
 namespace ReleaseTool.Controllers
 {
