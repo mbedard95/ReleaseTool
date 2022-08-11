@@ -14,4 +14,10 @@ namespace ReleaseTool.Features.Tags.Models.DataAccess
         [Required]
         public TagStatus TagStatus { get; set; }
     }
+
+    public enum TagStatus
+    {
+        Active,
+        Inactive
+    }
 }

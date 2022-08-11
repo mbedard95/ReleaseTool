@@ -18,4 +18,11 @@ namespace ReleaseTool.Models
         [Required]
         public int UserId { get; set; }
     }
+
+    public enum ChangeRequestStatus
+    {
+        Active,
+        Complete,
+        Abandoned
+    }
 }
