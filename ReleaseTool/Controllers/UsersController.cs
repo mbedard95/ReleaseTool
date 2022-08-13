@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
@@ -19,12 +20,14 @@ namespace ReleaseTool.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ReleaseToolContext _context;
-        readonly IMapper _mapper;
+        private readonly IMapper _mapper;
+        private readonly IRuleValidator _validator;
 
-        public UsersController(ReleaseToolContext context, IMapper mapper)
+        public UsersController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
         {
             _context = context;
             _mapper = mapper;
+            _validator = validator;
         }
 
         // GET: api/Users
@@ -96,9 +99,10 @@ namespace ReleaseTool.Controllers
                 return Problem("Entity set 'ReleaseToolContext.Users' is null.");
             }
 
-            if (EmailExists(dto.EmailAddress))
+            var validationResult = _validator.IsValidUser(dto);
+            if (!validationResult.IsValid)
             {
-                return BadRequest("Username already exists.");
+                return BadRequest(validationResult.Message);
             }
 
             var newUser = _mapper.Map<User>(dto);
@@ -137,11 +141,6 @@ namespace ReleaseTool.Controllers
         private bool UserExists(int id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }
-
-        private bool EmailExists(string email)
-        {
-            return (_context.Users?.Any(x => x.EmailAddress == email)).GetValueOrDefault();
-        }      
+        }            
     }
 }

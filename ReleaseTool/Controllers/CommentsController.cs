@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Comments.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.Dtos;
@@ -18,11 +19,13 @@ namespace ReleaseTool.Controllers
     {
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
+        private readonly IRuleValidator _validator;
 
-        public CommentsController(ReleaseToolContext context, IMapper mapper)
+        public CommentsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
         {
             _context = context;
             _mapper = mapper;
+            _validator = validator;
         }
 
         // GET: api/Comments
@@ -94,13 +97,10 @@ namespace ReleaseTool.Controllers
                 return Problem("Entity set 'ReleaseToolContext.Comment'  is null.");
             }
 
-            if (!ChangeRequestExists(dto.ChangeRequestId))
+            var validationResult = _validator.IsValidComment(dto);
+            if (!validationResult.IsValid)
             {
-                return BadRequest("Change request not found.");
-            }
-            if (!UserExists(dto.UserId))
-            {
-                return BadRequest("User not found.");
+                return BadRequest(validationResult.Message);
             }
 
             var comment = _mapper.Map<Comment>(dto);
@@ -135,11 +135,6 @@ namespace ReleaseTool.Controllers
         private bool CommentExists(int id)
         {
             return (_context.Comments?.Any(e => e.CommentId == id)).GetValueOrDefault();
-        }
-
-        private bool ChangeRequestExists(int id)
-        {
-            return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
         }
 
         private bool UserExists(int id)

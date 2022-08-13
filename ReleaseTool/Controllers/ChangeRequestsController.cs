@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Models;
@@ -18,11 +19,13 @@ namespace ReleaseTool.Controllers
     {
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
+        private readonly IRuleValidator _validator;
 
-        public ChangeRequestsController(ReleaseToolContext context, IMapper mapper)
+        public ChangeRequestsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
         {
             _context = context;
             _mapper = mapper;
+            _validator = validator;
         }
 
         // GET: api/ChangeRequests
@@ -94,12 +97,14 @@ namespace ReleaseTool.Controllers
                 return Problem("Entity set 'ReleaseToolContext.ChangeRequest'  is null.");
             }
 
-            if (!UserExists(dto.UserId))
+            var validationResult = _validator.IsValidChangeRequest(dto);
+            if (!validationResult.IsValid)
             {
-                return BadRequest("User not found.");
+                return BadRequest(validationResult.Message);
             }
 
             var changeRequest = _mapper.Map<ChangeRequest>(dto);
+            changeRequest.Created = DateTime.Now;
 
             _context.ChangeRequests.Add(changeRequest);
             await _context.SaveChangesAsync();
@@ -130,11 +135,6 @@ namespace ReleaseTool.Controllers
         private bool ChangeRequestExists(int id)
         {
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
-        }
-
-        private bool UserExists(int id)
-        {
-            return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }
+        }        
     }
 }

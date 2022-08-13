@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.Configuration;
 using ReleaseTool.DataAccess;
 using System.Text.Json.Serialization;
+using ReleaseTool.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")))
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddTransient<IRuleValidator, RuleValidator>();
 
 var app = builder.Build();
 

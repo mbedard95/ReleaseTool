@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
@@ -18,11 +19,13 @@ namespace ReleaseTool.Controllers
     {
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
+        private readonly IRuleValidator _validator;
 
-        public TagsController(ReleaseToolContext context, IMapper mapper)
+        public TagsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
         {
             _context = context;
             _mapper = mapper;
+            _validator = validator;
         }
 
         // GET: api/Tags
@@ -94,9 +97,11 @@ namespace ReleaseTool.Controllers
             {
                 return Problem("Entity set 'ReleaseToolContext.Tag'  is null.");
             }
-            if (TagNameExists(dto.Name))
+            
+            var validationResult = _validator.IsValidTag(dto);
+            if (!validationResult.IsValid)
             {
-                return BadRequest("Tag name already exists.");
+                return BadRequest(validationResult.Message);
             }
 
             var tag = _mapper.Map<Tag>(dto);
@@ -131,11 +136,6 @@ namespace ReleaseTool.Controllers
         private bool TagExists(int id)
         {
             return (_context.Tags?.Any(e => e.TagId == id)).GetValueOrDefault();
-        }
-
-        private bool TagNameExists(string name)
-        {
-            return (_context.Tags?.Any(x => x.Name == name)).GetValueOrDefault();
-        }
+        }        
     }
 }

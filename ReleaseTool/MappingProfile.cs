@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
+using ReleaseTool.Features.Approvals.Models.DataAccess;
+using ReleaseTool.Features.Approvals.Models.Dtos;
+using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Comments.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
+using ReleaseTool.Models;
 using System.Text;
 using XSystem.Security.Cryptography;
 
@@ -15,13 +19,12 @@ namespace ReleaseTool
         public MappingProfile()
         {
             CreateMap<WriteUserDto, User>()
-                .ForMember(dest => dest.Password, opts => opts.MapFrom(src => HashPassword(src.Password))); ;
-
+                .ForMember(dest => dest.Password, opts => opts.MapFrom(src => HashPassword(src.Password)));
             CreateMap<User, ReadUserDto>();
-
             CreateMap<WriteTagDto, Tag>();
-
             CreateMap<WriteCommentDto, Comment>();
+            CreateMap<WriteApprovalDto, Approval>();
+            CreateMap<WriteChangeRequestDto, ChangeRequest>();
         }
 
         private string HashPassword(string pw)
