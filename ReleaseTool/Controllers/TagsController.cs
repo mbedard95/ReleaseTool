@@ -122,13 +122,28 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
             var tag = await _context.Tags.FindAsync(id);
-            if (tag == null)
+            if (tag == null || tag.TagStatus == TagStatus.Inactive)
             {
                 return NotFound();
             }
 
-            _context.Tags.Remove(tag);
-            await _context.SaveChangesAsync();
+            tag.TagStatus = TagStatus.Inactive;
+            _context.Entry(tag).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TagExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return NoContent();
         }

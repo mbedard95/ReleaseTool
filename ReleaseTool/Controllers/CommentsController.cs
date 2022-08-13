@@ -136,10 +136,5 @@ namespace ReleaseTool.Controllers
         {
             return (_context.Comments?.Any(e => e.CommentId == id)).GetValueOrDefault();
         }
-
-        private bool UserExists(int id)
-        { 
-            return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }
     }
 }

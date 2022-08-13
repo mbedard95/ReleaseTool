@@ -15,6 +15,7 @@ namespace ReleaseTool.Models
         [Required]
         public DateTime Created { get; set; }
         public int UserId { get; set; }
+        public ChangeRequestStatus ChangeRequestStatus { get; set; }
     }
 
     public enum ChangeRequestStatus

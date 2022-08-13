@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Approvals.Models.Dtos;
+using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Comments.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.Dtos;
@@ -21,10 +22,15 @@ namespace ReleaseTool
             CreateMap<WriteUserDto, User>()
                 .ForMember(dest => dest.Password, opts => opts.MapFrom(src => HashPassword(src.Password)));
             CreateMap<User, ReadUserDto>();
+            
             CreateMap<WriteTagDto, Tag>();
+            
             CreateMap<WriteCommentDto, Comment>();
+            
             CreateMap<WriteApprovalDto, Approval>();
+            
             CreateMap<WriteChangeRequestDto, ChangeRequest>();
+            CreateMap<ChangeRequest, ReadChangeRequestDto>();
         }
 
         private string HashPassword(string pw)

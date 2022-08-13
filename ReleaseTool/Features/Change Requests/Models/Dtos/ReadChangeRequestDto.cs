@@ -12,6 +12,6 @@ namespace ReleaseTool.Features.Change_Requests.Models
         public string NotifyEmails { get; set; } = "";
         public DateTime Created { get; set; }
         public int UserId { get; set; }
-        public List<Tag> Tags { get; set; } = new List<Tag>();
+        public List<string> Tags { get; set; } = new List<string>();
     }
 }

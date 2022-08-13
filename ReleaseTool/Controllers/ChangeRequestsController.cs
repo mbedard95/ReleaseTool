@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
+using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Models;
 
@@ -41,9 +42,11 @@ namespace ReleaseTool.Controllers
 
         // GET: api/ChangeRequests/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ChangeRequest>> GetChangeRequest(int id)
+        public async Task<ActionResult<ReadChangeRequestDto>> GetChangeRequest(int id)
         {
-            if (_context.ChangeRequests == null)
+            if (_context.ChangeRequests == null 
+                || _context.ChangeRequestTags == null
+                || _context.Tags == null)
             {
                 return NotFound();
             }
@@ -54,7 +57,20 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            return changeRequest;
+            var dto = _mapper.Map<ReadChangeRequestDto>(changeRequest);
+
+            var tagMaps = await _context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId).ToListAsync();
+            // fix this eventually
+            foreach (var tag in tagMaps)
+            {
+                var tagObject = _context.Tags.FirstOrDefault(x => x.TagId == tag.TagId);
+                if (tagObject != null)
+                {
+                    dto.Tags.Add(tagObject.Name);
+                }
+            }
+
+            return dto;
         }
 
         // PUT: api/ChangeRequests/5
@@ -121,13 +137,28 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
             var changeRequest = await _context.ChangeRequests.FindAsync(id);
-            if (changeRequest == null)
+            if (changeRequest == null || changeRequest.ChangeRequestStatus == ChangeRequestStatus.Abandoned)
             {
                 return NotFound();
             }
 
-            _context.ChangeRequests.Remove(changeRequest);
-            await _context.SaveChangesAsync();
+            changeRequest.ChangeRequestStatus = ChangeRequestStatus.Abandoned;
+            _context.Entry(changeRequest).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ChangeRequestExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return NoContent();
         }
