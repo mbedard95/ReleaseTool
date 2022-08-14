@@ -57,6 +57,21 @@ namespace ReleaseTool.Controllers
             return comment;
         }
 
+        // GET: api/Comments/ChangeRequest/5
+        [HttpGet("ChangeRequest/{changeRequestId}")]
+        public async Task<ActionResult<IEnumerable<Comment>>> GetCommentsByChangeRequest(int changeRequestId)
+        {
+            if (_context.Comments == null || _context.ChangeRequests == null)
+            {
+                return NotFound();
+            }
+            if (_context.ChangeRequests.FirstOrDefault(x => x.ChangeRequestId == changeRequestId) == null)
+            {
+                return BadRequest("Change Request not found.");
+            }
+            return await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync();
+        }
+
         // PUT: api/Comments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
