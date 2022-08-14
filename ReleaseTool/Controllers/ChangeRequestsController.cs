@@ -10,6 +10,7 @@ using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
+using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -31,14 +32,24 @@ namespace ReleaseTool.Controllers
 
         // GET: api/ChangeRequests
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ChangeRequest>>> GetChangeRequest(bool includeInactive)
+        public async Task<ActionResult<IEnumerable<ReadChangeRequestDto>>> GetChangeRequest(bool includeInactive)
         {
             if (_context.ChangeRequests == null)
             {
                 return NotFound();
             }
-            return includeInactive == true ? await _context.ChangeRequests.ToListAsync()
-                : await _context.ChangeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned).ToListAsync();
+            var changeRequests = await _context.ChangeRequests.ToListAsync();
+
+            var dtos = includeInactive == true ? 
+                changeRequests.Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList()
+                : changeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned)
+                .Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList();
+            
+            foreach (var dto in dtos)
+            {
+                dto.Tags = GetTagNames(dto.ChangeRequestId);
+            }
+            return dtos;
         }
 
         // GET: api/ChangeRequests/5
@@ -59,17 +70,7 @@ namespace ReleaseTool.Controllers
             }
 
             var dto = _mapper.Map<ReadChangeRequestDto>(changeRequest);
-
-            var tagMaps = await _context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId).ToListAsync();
-            // fix this eventually
-            foreach (var tag in tagMaps)
-            {
-                var tagObject = _context.Tags.FirstOrDefault(x => x.TagId == tag.TagId);
-                if (tagObject != null)
-                {
-                    dto.Tags.Add(tagObject.Name);
-                }
-            }
+            dto.Tags = GetTagNames(dto.ChangeRequestId);
 
             return dto;
         }
@@ -109,7 +110,9 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<ChangeRequest>> PostChangeRequest(WriteChangeRequestDto dto)
         {
-            if (_context.ChangeRequests == null)
+            if (_context.ChangeRequests == null
+                || _context.ChangeRequestTags == null
+                || _context.Tags == null)
             {
                 return Problem("Entity set 'ReleaseToolContext.ChangeRequest'  is null.");
             }
@@ -122,11 +125,29 @@ namespace ReleaseTool.Controllers
 
             var changeRequest = _mapper.Map<ChangeRequest>(dto);
             changeRequest.Created = DateTime.Now;
+            changeRequest.ChangeRequestStatus = ChangeRequestStatus.Active;
 
             _context.ChangeRequests.Add(changeRequest);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, changeRequest);
+            foreach (var tagName in dto.Tags)
+            {
+                var tag = _context.Tags.FirstOrDefault(x => x.Name == tagName);
+                if (tag != null)
+                {
+                    _context.ChangeRequestTags.Add(new ChangeRequestTag
+                    {
+                        ChangeRequestId = changeRequest.ChangeRequestId,
+                        TagId = tag.TagId
+                    });
+                }               
+            }
+            await _context.SaveChangesAsync();
+
+            var viewChangeRequest = _mapper.Map<ReadChangeRequestDto>(changeRequest);
+            viewChangeRequest.Tags = GetTagNames(viewChangeRequest.ChangeRequestId);
+
+            return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, viewChangeRequest);
         }
 
         // DELETE: api/ChangeRequests/5
@@ -145,6 +166,7 @@ namespace ReleaseTool.Controllers
 
             changeRequest.ChangeRequestStatus = ChangeRequestStatus.Abandoned;
             _context.Entry(changeRequest).State = EntityState.Modified;
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -167,6 +189,25 @@ namespace ReleaseTool.Controllers
         private bool ChangeRequestExists(int id)
         {
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
-        }        
+        }
+
+        private List<string> GetTagNames(int changeRequestId)
+        {
+            List<string> tagNames = new();
+            if (_context.ChangeRequestTags == null || _context.Tags == null)
+            {
+                throw new Exception("Error mapping Tags to Change Request");
+            }
+            var tagMaps = _context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequestId).ToList();
+            foreach (var tag in tagMaps)
+            {
+                var tagObject = _context.Tags.FirstOrDefault(x => x.TagId == tag.TagId);
+                if (tagObject != null)
+                {
+                    tagNames.Add(tagObject.Name);
+                }
+            }
+            return tagNames;
+        }
     }
 }

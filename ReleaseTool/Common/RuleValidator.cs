@@ -41,6 +41,15 @@ namespace ReleaseTool.Common
                 result.Message = "User not found.";
                 return result;
             }
+            foreach (var tagName in dto.Tags)
+            {
+                if (!TagNameExists(tagName))
+                {
+                    result.IsValid = false;
+                    result.Message = $"Tag \"{tagName}\" not found";
+                    return result;
+                }
+            }
             return result;
         }
 
