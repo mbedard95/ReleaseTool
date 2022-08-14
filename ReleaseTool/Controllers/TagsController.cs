@@ -30,13 +30,14 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Tags
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetTag()
+        public async Task<ActionResult<IEnumerable<Tag>>> GetTag(bool includeInactive)
         {
             if (_context.Tags == null)
             {
                 return NotFound();
             }
-            return await _context.Tags.ToListAsync();
+            return includeInactive == true ? await _context.Tags.ToListAsync()
+                : await _context.Tags.Where(x => x.TagStatus != TagStatus.Inactive).ToListAsync();
         }
 
         // GET: api/Tags/5

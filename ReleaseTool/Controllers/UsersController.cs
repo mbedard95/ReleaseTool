@@ -32,14 +32,16 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetUsers(bool includeInactive)
         {
             if (_context.Users == null)
             {
                 return NotFound();
             }
             var users = await _context.Users.ToListAsync();
-            return users.Select(x => _mapper.Map<ReadUserDto>(x)).ToList();
+
+            return includeInactive == true ? users.Select(x => _mapper.Map<ReadUserDto>(x)).ToList() 
+                : users.Select(x => _mapper.Map<ReadUserDto>(x)).Where(x => x.UserStatus != UserStatus.Inactive).ToList();
         }
 
         // GET: api/Users/5
@@ -62,13 +64,15 @@ namespace ReleaseTool.Controllers
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<IActionResult> PutUser(int id, WriteUserDto dto)
         {
-            if (id != user.UserId)
+            var user = _context.Users.FirstOrDefault(x => x.UserId == id);
+            if (user == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
+            user = _mapper.Map<WriteUserDto, User>(dto, user);
             _context.Entry(user).State = EntityState.Modified;
 
             try

@@ -21,6 +21,7 @@ namespace ReleaseTool.Features.Approvals.Models.DataAccess
     {
         Pending,
         Approved,
-        Denied
+        Denied,
+        Removed
     }
 }

@@ -33,7 +33,7 @@ namespace ReleaseTool
             CreateMap<ChangeRequest, ReadChangeRequestDto>();
         }
 
-        private string HashPassword(string pw)
+        private static string HashPassword(string pw)
         {
             var hash = new SHA256Managed();
             byte[] crypto = hash.ComputeHash(Encoding.UTF8.GetBytes(pw));

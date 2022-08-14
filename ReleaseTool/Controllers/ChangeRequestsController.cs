@@ -31,13 +31,14 @@ namespace ReleaseTool.Controllers
 
         // GET: api/ChangeRequests
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ChangeRequest>>> GetChangeRequest()
+        public async Task<ActionResult<IEnumerable<ChangeRequest>>> GetChangeRequest(bool includeInactive)
         {
             if (_context.ChangeRequests == null)
             {
                 return NotFound();
             }
-            return await _context.ChangeRequests.ToListAsync();
+            return includeInactive == true ? await _context.ChangeRequests.ToListAsync()
+                : await _context.ChangeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned).ToListAsync();
         }
 
         // GET: api/ChangeRequests/5

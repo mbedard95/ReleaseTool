@@ -30,13 +30,14 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Approvals
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Approval>>> GetApproval()
+        public async Task<ActionResult<IEnumerable<Approval>>> GetApproval(bool includeInactive)
         {
             if (_context.Approvals == null)
             {
                 return NotFound();
             }
-            return await _context.Approvals.ToListAsync();
+            return includeInactive == true ? await _context.Approvals.ToListAsync()
+                : await _context.Approvals.Where(x => x.ApprovalStatus != ApprovalStatus.Removed).ToListAsync();
         }
 
         // GET: api/Approvals/5
