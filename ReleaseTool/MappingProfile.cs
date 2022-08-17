@@ -28,6 +28,7 @@ namespace ReleaseTool
             CreateMap<WriteCommentDto, Comment>();
             
             CreateMap<WriteApprovalDto, Approval>();
+            CreateMap<UpdateApprovalDto, Approval>();
             
             CreateMap<WriteChangeRequestDto, ChangeRequest>();
             CreateMap<ChangeRequest, ReadChangeRequestDto>();

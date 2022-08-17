@@ -34,7 +34,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Tags == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             return includeInactive == true ? await _context.Tags.ToListAsync()
                 : await _context.Tags.Where(x => x.TagStatus != TagStatus.Inactive).ToListAsync();
@@ -46,7 +46,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Tags == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var tag = await _context.Tags.FindAsync(id);
 
@@ -96,7 +96,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Tags == null)
             {
-                return Problem("Entity set 'ReleaseToolContext.Tag'  is null.");
+                return Problem("Entity set is null.");
             }
             
             var validationResult = _validator.IsValidTag(dto);
@@ -120,7 +120,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Tags == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var tag = await _context.Tags.FindAsync(id);
             if (tag == null || tag.TagStatus == TagStatus.Inactive)

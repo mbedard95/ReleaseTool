@@ -34,7 +34,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Comments == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             return changeRequestId > 0 ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
                 : await _context.Comments.ToListAsync();
@@ -46,7 +46,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Comments == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var comment = await _context.Comments.FindAsync(id);
 
@@ -95,7 +95,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Comments == null)
             {
-                return Problem("Entity set 'ReleaseToolContext.Comment'  is null.");
+                return Problem("Entity set is null.");
             }
 
             var validationResult = _validator.IsValidComment(dto);
@@ -119,7 +119,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Comments == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var comment = await _context.Comments.FindAsync(id);
             if (comment == null)

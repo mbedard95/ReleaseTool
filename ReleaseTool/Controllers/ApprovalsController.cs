@@ -34,7 +34,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Approvals == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             return includeInactive == true ? await _context.Approvals.ToListAsync()
                 : await _context.Approvals.Where(x => x.ApprovalStatus != ApprovalStatus.Removed).ToListAsync();
@@ -46,7 +46,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Approvals == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var approval = await _context.Approvals.FindAsync(id);
 
@@ -61,13 +61,19 @@ namespace ReleaseTool.Controllers
         // PUT: api/Approvals/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApproval(int id, Approval approval)
+        public async Task<IActionResult> PutApproval(int id, UpdateApprovalDto dto)
         {
-            if (id != approval.ApprovalId)
+            if (_context.Approvals == null)
             {
-                return BadRequest();
+                return Problem("Entity set is null.");
+            }
+            var approval = _context.Approvals.FirstOrDefault(x => x.ApprovalId == id);
+            if (approval == null)
+            {
+                return NotFound();
             }
 
+            approval = _mapper.Map(dto, approval);
             _context.Entry(approval).State = EntityState.Modified;
 
             try
@@ -96,7 +102,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Approvals == null)
             { 
-                return Problem("Entity set 'ReleaseToolContext.Approval'  is null.");
+                return Problem("Entity set is null.");
             }
 
             var validationResult = _validator.IsValidApproval(dto);
@@ -122,7 +128,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Approvals == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var approval = await _context.Approvals.FindAsync(id);
             if (approval == null)

@@ -36,7 +36,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Users == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var users = await _context.Users.ToListAsync();
 
@@ -50,7 +50,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Users == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var user = await _context.Users.FindAsync(id);
 
@@ -100,7 +100,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Users == null)
             {
-                return Problem("Entity set 'ReleaseToolContext.Users' is null.");
+                return Problem("Entity set is null.");
             }
 
             var validationResult = _validator.IsValidUser(dto);
@@ -117,9 +117,7 @@ namespace ReleaseTool.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            var viewUser = _mapper.Map<ReadUserDto>(newUser);
-
-            return CreatedAtAction("GetUser", new { id = newUser.UserId }, viewUser);
+            return CreatedAtAction("GetUser", new { id = newUser.UserId }, _mapper.Map<ReadUserDto>(newUser));
         }
 
         // DELETE: api/Users/5
@@ -128,7 +126,7 @@ namespace ReleaseTool.Controllers
         {
             if (_context.Users == null)
             {
-                return NotFound();
+                return Problem("Entity set is null.");
             }
             var user = await _context.Users.FindAsync(id);
             if (user == null || user.UserStatus == UserStatus.Inactive)
