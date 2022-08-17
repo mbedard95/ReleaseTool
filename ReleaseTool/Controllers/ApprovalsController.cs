@@ -30,7 +30,7 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Approvals
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Approval>>> GetApproval(bool includeInactive)
+        public async Task<ActionResult<IEnumerable<Approval>>> GetApprovals(bool includeInactive)
         {
             if (_context.Approvals == null)
             {

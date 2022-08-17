@@ -30,18 +30,19 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Comments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComment()
+        public async Task<ActionResult<IEnumerable<Comment>>> GetComments(int changeRequestId)
         {
             if (_context.Comments == null)
             {
                 return NotFound();
             }
-            return await _context.Comments.ToListAsync();
+            return changeRequestId > 0 ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
+                : await _context.Comments.ToListAsync();
         }
 
         // GET: api/Comments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetComment(int id)
+        public async Task<ActionResult<Comment>> GetCommentDetails(int id)
         {
             if (_context.Comments == null)
             {
@@ -55,21 +56,6 @@ namespace ReleaseTool.Controllers
             }
 
             return comment;
-        }
-
-        // GET: api/Comments/ChangeRequest/5
-        [HttpGet("ChangeRequest/{changeRequestId}")]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetCommentsByChangeRequest(int changeRequestId)
-        {
-            if (_context.Comments == null || _context.ChangeRequests == null)
-            {
-                return NotFound();
-            }
-            if (_context.ChangeRequests.FirstOrDefault(x => x.ChangeRequestId == changeRequestId) == null)
-            {
-                return BadRequest("Change Request not found.");
-            }
-            return await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync();
         }
 
         // PUT: api/Comments/5

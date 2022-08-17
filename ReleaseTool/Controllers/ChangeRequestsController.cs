@@ -32,7 +32,7 @@ namespace ReleaseTool.Controllers
 
         // GET: api/ChangeRequests
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadChangeRequestDto>>> GetChangeRequest(bool includeInactive)
+        public async Task<ActionResult<IEnumerable<ReadChangeRequestDto>>> GetChangeRequests(bool includeInactive)
         {
             if (_context.ChangeRequests == null)
             {
