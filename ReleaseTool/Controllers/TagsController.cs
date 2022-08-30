@@ -61,13 +61,20 @@ namespace ReleaseTool.Controllers
         // PUT: api/Tags/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTag(int id, Tag tag)
+        public async Task<IActionResult> PutTag(int id, WriteTagDto dto)
         {
-            if (id != tag.TagId)
+            if (_context.Tags == null)
             {
-                return BadRequest();
+                return Problem("Entity set is null.");
             }
 
+            var tag = _context.Tags.FirstOrDefault(x => x.TagId == id);
+            if (tag == null)
+            {
+                return NotFound();
+            }
+
+            tag = _mapper.Map(dto, tag);
             _context.Entry(tag).State = EntityState.Modified;
 
             try
@@ -89,8 +96,6 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        // POST: api/Tags
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Tag>> PostTag(WriteTagDto dto)
         {
@@ -107,6 +112,7 @@ namespace ReleaseTool.Controllers
 
             var tag = _mapper.Map<Tag>(dto);
             tag.Created = DateTime.Now;
+            tag.TagStatus = TagStatus.Active;
 
             _context.Tags.Add(tag);
             await _context.SaveChangesAsync();

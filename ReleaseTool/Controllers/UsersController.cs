@@ -72,7 +72,7 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            user = _mapper.Map<WriteUserDto, User>(dto, user);
+            user = _mapper.Map(dto, user);
             _context.Entry(user).State = EntityState.Modified;
 
             try
@@ -110,6 +110,7 @@ namespace ReleaseTool.Controllers
             }
 
             var newUser = _mapper.Map<User>(dto);
+            newUser.Password = HashPassword(dto.Password);
             
             newUser.UserStatus = UserStatus.Active;
             newUser.Created = DateTime.Now;
@@ -158,6 +159,13 @@ namespace ReleaseTool.Controllers
         private bool UserExists(int id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }            
+        }
+
+        private static string HashPassword(string pw)
+        {
+            var hash = new SHA256Managed();
+            byte[] crypto = hash.ComputeHash(Encoding.UTF8.GetBytes(pw));
+            return Convert.ToBase64String(crypto);
+        }
     }
 }

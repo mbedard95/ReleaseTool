@@ -7,6 +7,5 @@ namespace ReleaseTool.Features.Tags.Models.Dtos
     {
         [Required]
         public string Name { get; set; } = "";
-        public TagStatus TagStatus { get; set; } = TagStatus.Active;
     }
 }

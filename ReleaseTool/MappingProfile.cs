@@ -20,7 +20,7 @@ namespace ReleaseTool
         public MappingProfile()
         {
             CreateMap<WriteUserDto, User>()
-                .ForMember(dest => dest.Password, opts => opts.MapFrom(src => HashPassword(src.Password)));
+                .ForMember(dest => dest.Password, opts => opts.Ignore());
             CreateMap<User, ReadUserDto>();
             
             CreateMap<WriteTagDto, Tag>();
@@ -32,13 +32,6 @@ namespace ReleaseTool
             
             CreateMap<WriteChangeRequestDto, ChangeRequest>();
             CreateMap<ChangeRequest, ReadChangeRequestDto>();
-        }
-
-        private static string HashPassword(string pw)
-        {
-            var hash = new SHA256Managed();
-            byte[] crypto = hash.ComputeHash(Encoding.UTF8.GetBytes(pw));
-            return Convert.ToBase64String(crypto);
         }
     }
 }
