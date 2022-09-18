@@ -69,20 +69,27 @@ namespace ReleaseTool.Controllers
         }
 
         // PUT: api/ChangeRequests/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChangeRequest(int id, ChangeRequest changeRequest)
+        public async Task<IActionResult> PutChangeRequest(int id, WriteChangeRequestDto dto)
         {
-            if (id != changeRequest.ChangeRequestId)
+            if (_context.ChangeRequests == null)
             {
-                return BadRequest();
+                return Problem("Entity set is null.");
             }
 
+            var changeRequest = _context.ChangeRequests.FirstOrDefault(x => x.ChangeRequestId == id);
+            if (changeRequest == null)
+            {
+                return NotFound();
+            }
+
+            changeRequest = _mapper.Map(dto, changeRequest);
             _context.Entry(changeRequest).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                await SaveChangeRequestTagMaps(dto, changeRequest);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -116,9 +123,7 @@ namespace ReleaseTool.Controllers
                 return BadRequest(validationResult.Message);
             }
 
-            var changeRequest = _mapper.Map<ChangeRequest>(dto);
-            changeRequest.Created = DateTime.Now;
-            changeRequest.ChangeRequestStatus = ChangeRequestStatus.Active;
+            var changeRequest = GetNewChangeRequest(dto);
 
             _context.ChangeRequests.Add(changeRequest);
             await _context.SaveChangesAsync();
@@ -189,6 +194,7 @@ namespace ReleaseTool.Controllers
 
         private async Task SaveChangeRequestTagMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
         {
+            _context.RemoveRange(_context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId));
             foreach (var tagName in dto.Tags)
             {
                 var tag = _context.Tags.FirstOrDefault(x => x.Name == tagName);
@@ -209,6 +215,15 @@ namespace ReleaseTool.Controllers
             var result = _mapper.Map<ReadChangeRequestDto>(changeRequest);
             result.Tags = GetTagNames(result.ChangeRequestId);
             return result;
+        }
+
+        private ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto)
+        {
+            var changeRequest = _mapper.Map<ChangeRequest>(dto);
+            changeRequest.Created = DateTime.Now;
+            changeRequest.ChangeRequestStatus = ChangeRequestStatus.Active;
+
+            return changeRequest;
         }
     }
 }

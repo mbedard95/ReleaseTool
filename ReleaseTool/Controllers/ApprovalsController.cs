@@ -59,7 +59,6 @@ namespace ReleaseTool.Controllers
         }
 
         // PUT: api/Approvals/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApproval(int id, UpdateApprovalDto dto)
         {
@@ -96,7 +95,6 @@ namespace ReleaseTool.Controllers
         }
 
         // POST: api/Approvals
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Approval>> PostApproval(WriteApprovalDto dto)
         {
