@@ -6,9 +6,9 @@ namespace ReleaseTool.Features.Approvals.Models.DataAccess
     [Table("Approvals")]
     public class Approval
     {
-        public int ApprovalId { get; set; }
-        public int UserId { get; set; }
-        public int ChangeRequestId { get; set; }
+        public Guid ApprovalId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ChangeRequestId { get; set; }
         [Required]
         public ApprovalStatus ApprovalStatus { get; set; }
         public string EmailAddress { get; set; } = "";

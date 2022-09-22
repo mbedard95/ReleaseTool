@@ -8,7 +8,7 @@ namespace ReleaseTool.Common
 {
     public interface IRuleValidator
     {
-        ValidationResult IsValidUser(WriteUserDto dto);
+        ValidationResult IsValidUser(WriteUserDto dto, Guid id);
         ValidationResult IsValidChangeRequest(WriteChangeRequestDto dto);
         ValidationResult IsValidTag(WriteTagDto dto);
         ValidationResult IsValidComment(WriteCommentDto dto);

@@ -46,7 +46,7 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReadUserDto>> GetUser(int id)
+        public async Task<ActionResult<ReadUserDto>> GetUser(Guid id)
         {
             if (_context.Users == null)
             {
@@ -64,12 +64,18 @@ namespace ReleaseTool.Controllers
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, WriteUserDto dto)
+        public async Task<IActionResult> PutUser(Guid id, WriteUserDto dto)
         {
             var user = _context.Users.FirstOrDefault(x => x.UserId == id);
             if (user == null)
             {
                 return NotFound();
+            }
+
+            var validationResult = _validator.IsValidUser(dto, id);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Message);
             }
 
             user = _mapper.Map(dto, user);
@@ -103,17 +109,14 @@ namespace ReleaseTool.Controllers
                 return Problem("Entity set is null.");
             }
 
-            var validationResult = _validator.IsValidUser(dto);
+            var id = Guid.NewGuid();
+            var validationResult = _validator.IsValidUser(dto, id);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Message);
             }
 
-            var newUser = _mapper.Map<User>(dto);
-            newUser.Password = HashPassword(dto.Password);
-            
-            newUser.UserStatus = UserStatus.Active;
-            newUser.Created = DateTime.Now;
+            var newUser = CreateUser(dto, id);
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
@@ -123,7 +126,7 @@ namespace ReleaseTool.Controllers
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             if (_context.Users == null)
             {
@@ -152,11 +155,22 @@ namespace ReleaseTool.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        private User CreateUser(WriteUserDto dto, Guid id)
+        {
+            var newUser = _mapper.Map<User>(dto);
+            newUser.Password = HashPassword(dto.Password);
+
+            newUser.UserId = id;
+            newUser.UserStatus = UserStatus.Active;
+            newUser.Created = DateTime.Now;
+
+            return newUser;
+        }
+
+        private bool UserExists(Guid id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
         }

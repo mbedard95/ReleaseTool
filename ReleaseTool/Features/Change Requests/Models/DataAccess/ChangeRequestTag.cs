@@ -6,10 +6,10 @@ namespace ReleaseTool.Features.Tags.Models.DataAccess
     [Table("ChangeRequestTags")]
     public class ChangeRequestTag
     {
-        public int ChangeRequestTagId { get; set; }
+        public Guid ChangeRequestTagId { get; set; }
         [Required]
-        public int ChangeRequestId { get; set; }
+        public Guid ChangeRequestId { get; set; }
         [Required]
-        public int TagId { get; set; }
+        public Guid TagId { get; set; }
     }
 }

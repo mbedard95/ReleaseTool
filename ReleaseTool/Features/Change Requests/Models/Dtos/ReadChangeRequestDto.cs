@@ -4,14 +4,14 @@ namespace ReleaseTool.Features.Change_Requests.Models
 {
     public class ReadChangeRequestDto
     {
-        public int ChangeRequestId { get; set; }
+        public Guid ChangeRequestId { get; set; }
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
         public string ReleaseSteps { get; set; } = "";
         public string RollbackProcedure { get; set; } = "";
         public string NotifyEmails { get; set; } = "";
         public DateTime Created { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
     }
 }

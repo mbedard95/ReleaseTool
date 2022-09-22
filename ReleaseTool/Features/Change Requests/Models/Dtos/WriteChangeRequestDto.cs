@@ -12,7 +12,7 @@ namespace ReleaseTool.Features.Change_Requests.Models.Dtos
         public string RollbackProcedure { get; set; } = "";
         public string NotifyEmails { get; set; } = "";
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
     }
 }

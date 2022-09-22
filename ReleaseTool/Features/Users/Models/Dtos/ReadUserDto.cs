@@ -4,7 +4,7 @@ namespace ReleaseTool.Features.Users.Models.Dtos
 {
     public class ReadUserDto
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string EmailAddress { get; set; } = "";
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";

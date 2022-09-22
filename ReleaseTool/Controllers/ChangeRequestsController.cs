@@ -70,7 +70,7 @@ namespace ReleaseTool.Controllers
 
         // PUT: api/ChangeRequests/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChangeRequest(int id, WriteChangeRequestDto dto)
+        public async Task<IActionResult> PutChangeRequest(Guid id, WriteChangeRequestDto dto)
         {
             if (_context.ChangeRequests == null)
             {
@@ -134,7 +134,7 @@ namespace ReleaseTool.Controllers
 
         // DELETE: api/ChangeRequests/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteChangeRequest(int id)
+        public async Task<IActionResult> DeleteChangeRequest(Guid id)
         {
             if (_context.ChangeRequests == null)
             {
@@ -168,12 +168,12 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        private bool ChangeRequestExists(int id)
+        private bool ChangeRequestExists(Guid id)
         {
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
         }
 
-        private List<string> GetTagNames(int changeRequestId)
+        private List<string> GetTagNames(Guid changeRequestId)
         {
             List<string> tagNames = new();
             if (_context.ChangeRequestTags == null || _context.Tags == null)

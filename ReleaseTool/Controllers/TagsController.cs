@@ -61,7 +61,7 @@ namespace ReleaseTool.Controllers
         // PUT: api/Tags/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTag(int id, WriteTagDto dto)
+        public async Task<IActionResult> PutTag(Guid id, WriteTagDto dto)
         {
             if (_context.Tags == null)
             {
@@ -122,7 +122,7 @@ namespace ReleaseTool.Controllers
 
         // DELETE: api/Tags/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTag(int id)
+        public async Task<IActionResult> DeleteTag(Guid id)
         {
             if (_context.Tags == null)
             {
@@ -155,7 +155,7 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        private bool TagExists(int id)
+        private bool TagExists(Guid id)
         {
             return (_context.Tags?.Any(e => e.TagId == id)).GetValueOrDefault();
         }        

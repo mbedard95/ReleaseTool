@@ -20,10 +20,10 @@ namespace ReleaseTool.Common
         {
             _context = context;
         }
-        public ValidationResult IsValidUser(WriteUserDto dto)
+        public ValidationResult IsValidUser(WriteUserDto dto, Guid id)
         {
             var result = new ValidationResult();
-            if (EmailExists(dto.EmailAddress))
+            if (EmailExists(dto.EmailAddress, id))
             {
                 result.IsValid = false;
                 result.Message = "Username already exists.";
@@ -101,11 +101,11 @@ namespace ReleaseTool.Common
             return result;
         }
 
-        private bool EmailExists(string email)
+        private bool EmailExists(string email, Guid id)
         {
-            return (_context.Users?.Any(x => x.EmailAddress == email)).GetValueOrDefault();
+            return (_context.Users?.Any(x => x.EmailAddress == email && x.UserId != id)).GetValueOrDefault();
         }
-        private bool UserExists(int id)
+        private bool UserExists(Guid id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
@@ -113,7 +113,7 @@ namespace ReleaseTool.Common
         {
             return (_context.Tags?.Any(x => x.Name== name)).GetValueOrDefault();
         }
-        private bool ChangeRequestExists(int id)
+        private bool ChangeRequestExists(Guid id)
         {
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
         }

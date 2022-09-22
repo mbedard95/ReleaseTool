@@ -7,8 +7,8 @@ namespace ReleaseTool.Features.Comments.Models.Dtos
         [Required]
         public string CommentData { get; set; } = "";
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         [Required]
-        public int ChangeRequestId { get; set; }
+        public Guid ChangeRequestId { get; set; }
     }
 }

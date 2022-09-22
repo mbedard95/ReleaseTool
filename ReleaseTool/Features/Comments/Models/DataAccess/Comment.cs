@@ -6,10 +6,10 @@ namespace ReleaseTool.Features.Comments.Models.DataAccess
     [Table("Comments")]
     public class Comment
     {
-        public int CommentId { get; set; }
+        public Guid CommentId { get; set; }
         public string CommentData { get; set; } = "";
-        public int UserId { get; set; }
-        public int ChangeRequestId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ChangeRequestId { get; set; }
         [Required]
         public DateTime Created { get; set; }
     }

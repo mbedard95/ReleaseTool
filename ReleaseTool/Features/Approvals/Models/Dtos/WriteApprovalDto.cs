@@ -5,9 +5,9 @@ namespace ReleaseTool.Features.Approvals.Models.Dtos
     public class WriteApprovalDto
     {
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         [Required]
-        public int ChangeRequestId { get; set; }
+        public Guid ChangeRequestId { get; set; }
         [Required]
         public string EmailAddress { get; set; } = "";
     }

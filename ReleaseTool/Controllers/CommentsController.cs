@@ -30,19 +30,19 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Comments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComments(int changeRequestId)
+        public async Task<ActionResult<IEnumerable<Comment>>> GetComments(Guid? changeRequestId)
         {
             if (_context.Comments == null)
             {
                 return Problem("Entity set is null.");
             }
-            return changeRequestId > 0 ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
+            return (changeRequestId != null) ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
                 : await _context.Comments.ToListAsync();
         }
 
         // GET: api/Comments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetCommentDetails(int id)
+        public async Task<ActionResult<Comment>> GetCommentDetails(Guid id)
         {
             if (_context.Comments == null)
             {
@@ -61,7 +61,7 @@ namespace ReleaseTool.Controllers
         // PUT: api/Comments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, Comment comment)
+        public async Task<IActionResult> PutComment(Guid id, Comment comment)
         {
             if (id != comment.CommentId)
             {
@@ -115,7 +115,7 @@ namespace ReleaseTool.Controllers
 
         // DELETE: api/Comments/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
+        public async Task<IActionResult> DeleteComment(Guid id)
         {
             if (_context.Comments == null)
             {
@@ -133,7 +133,7 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        private bool CommentExists(int id)
+        private bool CommentExists(Guid id)
         {
             return (_context.Comments?.Any(e => e.CommentId == id)).GetValueOrDefault();
         }

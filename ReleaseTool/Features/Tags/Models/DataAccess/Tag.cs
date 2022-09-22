@@ -6,7 +6,7 @@ namespace ReleaseTool.Features.Tags.Models.DataAccess
     [Table("Tags")]
     public class Tag
     {
-        public int TagId { get; set; }
+        public Guid TagId { get; set; }
         public string Name { get; set; } = "";
         [Required]
         public DateTime Created { get; set; }

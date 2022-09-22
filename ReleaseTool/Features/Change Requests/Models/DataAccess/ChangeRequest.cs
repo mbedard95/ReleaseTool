@@ -6,7 +6,7 @@ namespace ReleaseTool.Models
     [Table("ChangeRequests")]
     public class ChangeRequest
     {
-        public int ChangeRequestId { get; set; }
+        public Guid ChangeRequestId { get; set; }
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
         public string ReleaseSteps { get; set; } = "";
@@ -14,7 +14,7 @@ namespace ReleaseTool.Models
         public string NotifyEmails { get; set; } = "";
         [Required]
         public DateTime Created { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public ChangeRequestStatus ChangeRequestStatus { get; set; }
     }
 

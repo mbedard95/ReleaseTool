@@ -60,7 +60,7 @@ namespace ReleaseTool.Controllers
 
         // PUT: api/Approvals/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApproval(int id, UpdateApprovalDto dto)
+        public async Task<IActionResult> PutApproval(Guid id, UpdateApprovalDto dto)
         {
             if (_context.Approvals == null)
             {
@@ -103,16 +103,14 @@ namespace ReleaseTool.Controllers
                 return Problem("Entity set is null.");
             }
 
+            var id = Guid.NewGuid();
             var validationResult = _validator.IsValidApproval(dto);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Message);
             }
 
-            var approval = _mapper.Map<Approval>(dto);
-            approval.ApprovalStatus = ApprovalStatus.Pending;
-            approval.ApprovedDate = DateTime.MaxValue;
-            approval.Created = DateTime.Now;
+            var approval = CreateApproval(dto, id);
 
             _context.Approvals.Add(approval);
             await _context.SaveChangesAsync();
@@ -122,7 +120,7 @@ namespace ReleaseTool.Controllers
 
         // DELETE: api/Approvals/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteApproval(int id)
+        public async Task<IActionResult> DeleteApproval(Guid id)
         {
             if (_context.Approvals == null)
             {
@@ -140,9 +138,19 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        private bool ApprovalExists(int id)
+        private bool ApprovalExists(Guid id)
         {
             return (_context.Approvals?.Any(e => e.ApprovalId == id)).GetValueOrDefault();
+        }
+
+        private Approval CreateApproval(WriteApprovalDto dto, Guid id)
+        {
+            var approval = _mapper.Map<Approval>(dto);
+            approval.ApprovalStatus = ApprovalStatus.Pending;
+            approval.ApprovedDate = DateTime.MaxValue;
+            approval.Created = DateTime.Now;
+            
+            return approval;
         }
     }
 }
