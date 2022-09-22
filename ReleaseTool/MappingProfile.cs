@@ -10,8 +10,6 @@ using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
 using ReleaseTool.Models;
-using System.Text;
-using XSystem.Security.Cryptography;
 
 namespace ReleaseTool
 {

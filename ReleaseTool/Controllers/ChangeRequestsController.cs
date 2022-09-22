@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.Common;
@@ -83,13 +78,19 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
+            var validationResult = _validator.IsValidChangeRequest(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Message);
+            }
+
             changeRequest = _mapper.Map(dto, changeRequest);
             _context.Entry(changeRequest).State = EntityState.Modified;
 
             try
-            {
+            {               
+                SaveChangeRequestTagMaps(dto, changeRequest);
                 await _context.SaveChangesAsync();
-                await SaveChangeRequestTagMaps(dto, changeRequest);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -125,10 +126,9 @@ namespace ReleaseTool.Controllers
 
             var changeRequest = GetNewChangeRequest(dto);
 
-            _context.ChangeRequests.Add(changeRequest);
+            _context.ChangeRequests.Add(changeRequest);          
+            SaveChangeRequestTagMaps(dto, changeRequest);
             await _context.SaveChangesAsync();
-            await SaveChangeRequestTagMaps(dto, changeRequest);
-
             return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, ConvertToView(changeRequest));
         }
 
@@ -192,7 +192,7 @@ namespace ReleaseTool.Controllers
             return tagNames;
         }
 
-        private async Task SaveChangeRequestTagMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
+        private void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
         {
             _context.RemoveRange(_context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId));
             foreach (var tagName in dto.Tags)
@@ -207,7 +207,6 @@ namespace ReleaseTool.Controllers
                     });
                 }
             }
-            await _context.SaveChangesAsync();
         }
 
         private ReadChangeRequestDto ConvertToView(ChangeRequest changeRequest)

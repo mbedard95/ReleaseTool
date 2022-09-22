@@ -61,13 +61,19 @@ namespace ReleaseTool.Controllers
         // PUT: api/Comments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(Guid id, Comment comment)
+        public async Task<IActionResult> PutComment(Guid id, WriteCommentDto dto)
         {
-            if (id != comment.CommentId)
+            if (_context.Comments == null)
             {
-                return BadRequest();
+                return Problem("Entity set is null.");
+            }
+            var comment = _context.Comments.FirstOrDefault(x => x.CommentId == id);
+            if (comment == null)
+            {
+                return NotFound();
             }
 
+            comment = _mapper.Map(dto, comment);
             _context.Entry(comment).State = EntityState.Modified;
 
             try
