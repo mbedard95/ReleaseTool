@@ -3,74 +3,74 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
-using ReleaseTool.Features.Tags.Models.DataAccess;
-using ReleaseTool.Features.Tags.Models.Dtos;
+using ReleaseTool.Features.Groups.Models.DataAccess;
+using ReleaseTool.Features.Groups.Models.Dtos;
 
 namespace ReleaseTool.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TagsController : ControllerBase
+    public class GroupsController : ControllerBase
     {
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
         private readonly IRuleValidator _validator;
 
-        public TagsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
+        public GroupsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
         {
             _context = context;
             _mapper = mapper;
             _validator = validator;
         }
 
-        // GET: api/Tags
+        // GET: api/Groups
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetTags(bool includeInactive)
+        public async Task<ActionResult<IEnumerable<Group>>> GetGroups(bool includeInactive)
         {
-            if (_context.Tags == null)
+            if (_context.Groups == null)
             {
                 return Problem("Entity set is null.");
             }
-            return includeInactive == true ? await _context.Tags.ToListAsync()
-                : await _context.Tags.Where(x => x.TagStatus != TagStatus.Inactive).ToListAsync();
+            return includeInactive == true ? await _context.Groups.ToListAsync()
+                : await _context.Groups.Where(x => x.GroupStatus != GroupStatus.Inactive).ToListAsync();
         }
 
-        // GET: api/Tags/5
+        // GET: api/Groups/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tag>> GetTag(Guid id)
+        public async Task<ActionResult<Group>> GetGroups(Guid id)
         {
-            if (_context.Tags == null)
+            if (_context.Groups == null)
             {
                 return Problem("Entity set is null.");
             }
-            var tag = await _context.Tags.FindAsync(id);
+            var group = await _context.Groups.FindAsync(id);
 
-            if (tag == null)
+            if (group == null)
             {
                 return NotFound();
             }
 
-            return tag;
+            return group;
         }
 
-        // PUT: api/Tags/5
+        // PUT: api/Groups/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTag(Guid id, WriteTagDto dto)
+        public async Task<IActionResult> PutGroup(Guid id, WriteGroupDto dto)
         {
-            if (_context.Tags == null)
+            if (_context.Groups == null)
             {
                 return Problem("Entity set is null.");
             }
 
-            var tag = _context.Tags.FirstOrDefault(x => x.TagId == id);
-            if (tag == null)
+            var group = _context.Groups.FirstOrDefault(x => x.GroupId == id);
+            if (group == null)
             {
                 return NotFound();
             }
 
-            tag = _mapper.Map(dto, tag);
-            _context.Entry(tag).State = EntityState.Modified;
+            group = _mapper.Map(dto, group);
+            _context.Entry(group).State = EntityState.Modified;
 
             try
             {
@@ -78,7 +78,7 @@ namespace ReleaseTool.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TagExists(id))
+                if (!GroupExists(id))
                 {
                     return NotFound();
                 }
@@ -92,52 +92,52 @@ namespace ReleaseTool.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Tag>> PostTag(WriteTagDto dto)
+        public async Task<ActionResult<Group>> PostGroup(WriteGroupDto dto)
         {
-            if (_context.Tags == null)
+            if (_context.Groups == null)
             {
                 return Problem("Entity set is null.");
             }
-            
-            var validationResult = _validator.IsValidTag(dto);
+
+            var validationResult = _validator.IsValidGroup(dto);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Message);
             }
 
-            var tag = _mapper.Map<Tag>(dto);
-            tag.Created = DateTime.Now;
-            tag.TagStatus = TagStatus.Active;
+            var group = _mapper.Map<Group>(dto);
+            group.Created = DateTime.Now;
+            group.GroupStatus = GroupStatus.Active;
 
-            _context.Tags.Add(tag);
+            _context.Groups.Add(group);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTag", new { id = tag.TagId }, tag);
+            return CreatedAtAction("GetGroup", new { id = group.GroupId }, group);
         }
 
-        // DELETE: api/Tags/5
+        // DELETE: api/Groups/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTag(Guid id)
+        public async Task<IActionResult> DeleteGroup(Guid id)
         {
-            if (_context.Tags == null)
+            if (_context.Groups == null)
             {
                 return Problem("Entity set is null.");
             }
-            var tag = await _context.Tags.FindAsync(id);
-            if (tag == null || tag.TagStatus == TagStatus.Inactive)
+            var group = await _context.Groups.FindAsync(id);
+            if (group == null || group.GroupStatus == GroupStatus.Inactive)
             {
                 return NotFound();
             }
 
-            tag.TagStatus = TagStatus.Inactive;
-            _context.Entry(tag).State = EntityState.Modified;
+            group.GroupStatus = GroupStatus.Inactive;
+            _context.Entry(group).State = EntityState.Modified;
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TagExists(id))
+                if (!GroupExists(id))
                 {
                     return NotFound();
                 }
@@ -150,9 +150,9 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        private bool TagExists(Guid id)
+        private bool GroupExists(Guid id)
         {
-            return (_context.Tags?.Any(e => e.TagId == id)).GetValueOrDefault();
-        }        
+            return (_context.Groups?.Any(e => e.GroupId == id)).GetValueOrDefault();
+        }
     }
 }

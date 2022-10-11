@@ -35,8 +35,10 @@ namespace ReleaseTool.Controllers
             }
             var users = await _context.Users.ToListAsync();
 
-            return includeInactive == true ? users.Select(x => _mapper.Map<ReadUserDto>(x)).ToList() 
-                : users.Select(x => _mapper.Map<ReadUserDto>(x)).Where(x => x.UserStatus != UserStatus.Inactive).ToList();
+            return includeInactive == true ?
+                users.Select(x => _mapper.Map<ReadUserDto>(x)).ToList()
+                : users.Where(x => x.UserStatus != UserStatus.Inactive)
+                .Select(x => ConvertToView(x)).ToList();
         }
 
         // GET: api/Users/5
@@ -54,7 +56,7 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            return _mapper.Map<ReadUserDto>(user);
+            return ConvertToView(user);
         }
 
         // PUT: api/Users/5
@@ -111,9 +113,10 @@ namespace ReleaseTool.Controllers
                 return BadRequest(validationResult.Message);
             }
 
-            var newUser = CreateUser(dto, id);
+            var newUser = GetNewUser(dto, id);
 
             _context.Users.Add(newUser);
+            SaveUserGroupMaps(dto, newUser);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = newUser.UserId }, _mapper.Map<ReadUserDto>(newUser));
@@ -153,7 +156,7 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        private User CreateUser(WriteUserDto dto, Guid id)
+        private User GetNewUser(WriteUserDto dto, Guid id)
         {
             var newUser = _mapper.Map<User>(dto);
             newUser.Password = HashPassword(dto.Password);
@@ -175,6 +178,49 @@ namespace ReleaseTool.Controllers
             var hash = new SHA256Managed();
             byte[] crypto = hash.ComputeHash(Encoding.UTF8.GetBytes(pw));
             return Convert.ToBase64String(crypto);
+        }
+
+        private List<string> GetGroupNames(Guid userId)
+        {
+            List<string> groupNames = new();
+            if (_context.UserGroups == null || _context.Groups == null)
+            {
+                throw new Exception("Error mapping Groups to User");
+            }
+            var groupMaps = _context.UserGroups.Where(x => x.UserId == userId).ToList();
+            foreach (var group in groupMaps)
+            {
+                var groupObject = _context.Groups.FirstOrDefault(x => x.GroupId == group.GroupId);
+                if (groupObject != null)
+                {
+                    groupNames.Add(groupObject.GroupName);
+                }
+            }
+            return groupNames;
+        }
+
+        private void SaveUserGroupMaps(WriteUserDto dto, User user)
+        {
+            _context.RemoveRange(_context.UserGroups.Where(x => x.UserId == user.UserId));
+            foreach (var groupName in dto.Groups)
+            {
+                var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName);
+                if (group != null)
+                {
+                    _context.UserGroups.Add(new UserGroup
+                    {
+                        UserId = user.UserId,
+                        GroupId = group.GroupId
+                    });
+                }
+            }
+        }
+
+        private ReadUserDto ConvertToView(User user)
+        {
+            var result = _mapper.Map<ReadUserDto>(user);
+            result.Groups = GetGroupNames(result.UserId);
+            return result;
         }
     }
 }

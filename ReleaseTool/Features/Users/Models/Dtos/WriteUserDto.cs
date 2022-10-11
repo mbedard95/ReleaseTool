@@ -17,5 +17,6 @@ namespace ReleaseTool.Features.Users.Models.Dtos
         public string LastName { get; set; } = "";
         [Required]
         public UserPermissions UserPermissions { get; set; }
+        public List<string> Groups { get; set; } = new List<string>();
     }
 }

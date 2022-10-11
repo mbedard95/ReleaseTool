@@ -5,6 +5,7 @@ using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.DataAccess;
+using ReleaseTool.Features.Groups.Models.DataAccess;
 
 namespace ReleaseTool.DataAccess
 {
@@ -22,5 +23,7 @@ namespace ReleaseTool.DataAccess
         public DbSet<Comment>? Comments { get; set; }
         public DbSet<ChangeRequest>? ChangeRequests { get; set; }
         public DbSet<ChangeRequestTag>? ChangeRequestTags { get; set; }
+        public DbSet<Group>? Groups { get; set; }
+        public DbSet<UserGroup>? UserGroups { get; set; }
     }
 }

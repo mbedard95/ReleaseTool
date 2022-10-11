@@ -11,5 +11,6 @@ namespace ReleaseTool.Features.Users.Models.Dtos
         public UserStatus UserStatus { get; set; }        
         public DateTime Created { get; set; }
         public UserPermissions UserPermissions { get; set; }
+        public List<string> Groups { get; set; } = new List<string>();
     }
 }

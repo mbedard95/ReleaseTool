@@ -2,6 +2,7 @@
 using ReleaseTool.Features.Approvals.Models.Dtos;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Comments.Models.Dtos;
+using ReleaseTool.Features.Groups.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.Dtos;
 
@@ -65,6 +66,18 @@ namespace ReleaseTool.Common
             return result;
         }
 
+        public ValidationResult IsValidGroup(WriteGroupDto dto)
+        {
+            var result = new ValidationResult();
+            if (GroupNameExists(dto.GroupName))
+            {
+                result.IsValid = false;
+                result.Message = "Group name already exists.";
+                return result;
+            }
+            return result;
+        }
+
         public ValidationResult IsValidComment(WriteCommentDto dto)
         {
             var result = new ValidationResult();
@@ -112,6 +125,10 @@ namespace ReleaseTool.Common
         private bool TagNameExists(string name)
         {
             return (_context.Tags?.Any(x => x.Name== name)).GetValueOrDefault();
+        }
+        private bool GroupNameExists(string name)
+        {
+            return (_context.Groups?.Any(x => x.GroupName == name)).GetValueOrDefault();
         }
         private bool ChangeRequestExists(Guid id)
         {

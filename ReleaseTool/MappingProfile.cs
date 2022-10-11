@@ -5,6 +5,8 @@ using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Comments.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.Dtos;
+using ReleaseTool.Features.Groups.Models.DataAccess;
+using ReleaseTool.Features.Groups.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.DataAccess;
@@ -30,6 +32,8 @@ namespace ReleaseTool
             
             CreateMap<WriteChangeRequestDto, ChangeRequest>();
             CreateMap<ChangeRequest, ReadChangeRequestDto>();
+
+            CreateMap<WriteGroupDto, Group>();
         }
     }
 }

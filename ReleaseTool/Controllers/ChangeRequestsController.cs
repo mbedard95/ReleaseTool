@@ -35,12 +35,10 @@ namespace ReleaseTool.Controllers
             }
             var changeRequests = await _context.ChangeRequests.ToListAsync();
 
-            var dtos = includeInactive == true ? 
+            return includeInactive == true ? 
                 changeRequests.Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList()
                 : changeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned)
                 .Select(x => ConvertToView(x)).ToList();
-            
-            return dtos;
         }
 
         // GET: api/ChangeRequests/5
