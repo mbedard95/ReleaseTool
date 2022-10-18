@@ -2,7 +2,9 @@
 using ReleaseTool.Features.Approvals.Models.Dtos;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Comments.Models.Dtos;
+using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Groups.Models.Dtos;
+using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.Dtos;
 
@@ -60,7 +62,7 @@ namespace ReleaseTool.Common
             if (TagNameExists(dto.Name))
             {
                 result.IsValid = false;
-                result.Message = "Tag name already exists.";
+                result.Message = $"Tag name {dto.Name} already exists.";
                 return result;
             }
             return result;
@@ -124,11 +126,11 @@ namespace ReleaseTool.Common
         }
         private bool TagNameExists(string name)
         {
-            return (_context.Tags?.Any(x => x.Name== name)).GetValueOrDefault();
+            return (_context.Tags?.Any(x => x.Name == name && x.TagStatus == TagStatus.Active)).GetValueOrDefault();
         }
         private bool GroupNameExists(string name)
         {
-            return (_context.Groups?.Any(x => x.GroupName == name)).GetValueOrDefault();
+            return (_context.Groups?.Any(x => x.GroupName == name && x.GroupStatus == GroupStatus.Active)).GetValueOrDefault();
         }
         private bool ChangeRequestExists(Guid id)
         {
