@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Approvals.Models.Dtos;
@@ -14,13 +13,11 @@ namespace ReleaseTool.Controllers
     {
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
-        private readonly IRuleValidator _validator;
 
-        public ApprovalsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
+        public ApprovalsController(ReleaseToolContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _validator = validator;
         }
 
         // GET: api/Approvals
@@ -89,30 +86,6 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
-        // POST: api/Approvals
-        [HttpPost]
-        public async Task<ActionResult<Approval>> PostApproval(WriteApprovalDto dto)
-        {
-            if (_context.Approvals == null)
-            { 
-                return Problem("Entity set is null.");
-            }
-
-            var id = Guid.NewGuid();
-            var validationResult = _validator.IsValidApproval(dto);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Message);
-            }
-
-            var approval = CreateApproval(dto, id);
-
-            _context.Approvals.Add(approval);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetApproval", new { id = approval.ApprovalId }, approval);
-        }
-
         // DELETE: api/Approvals/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApproval(Guid id)
@@ -138,14 +111,6 @@ namespace ReleaseTool.Controllers
             return (_context.Approvals?.Any(e => e.ApprovalId == id)).GetValueOrDefault();
         }
 
-        private Approval CreateApproval(WriteApprovalDto dto, Guid id)
-        {
-            var approval = _mapper.Map<Approval>(dto);
-            approval.ApprovalStatus = ApprovalStatus.Pending;
-            approval.ApprovedDate = DateTime.MaxValue;
-            approval.Created = DateTime.Now;
-            
-            return approval;
-        }
+        
     }
 }

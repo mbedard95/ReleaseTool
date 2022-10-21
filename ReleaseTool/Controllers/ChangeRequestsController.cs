@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models;
+using ReleaseTool.Features.Change_Requests.Models.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Models;
@@ -124,8 +125,11 @@ namespace ReleaseTool.Controllers
 
             var changeRequest = GetNewChangeRequest(dto);
 
-            _context.ChangeRequests.Add(changeRequest);          
+            _context.ChangeRequests.Add(changeRequest);
+            
             SaveChangeRequestTagMaps(dto, changeRequest);
+            SaveChangeRequestGroupMaps(dto, changeRequest);
+
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, ConvertToView(changeRequest));
         }
@@ -190,6 +194,25 @@ namespace ReleaseTool.Controllers
             return tagNames;
         }
 
+        private List<string> GetGroupNames(Guid changeRequestId)
+        {
+            List<string> groupNames = new();
+            if (_context.ChangeRequestGroups == null || _context.Groups == null)
+            {
+                throw new Exception("Error mapping Groups to Change Request");
+            }
+            var groupMaps = _context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequestId).ToList();
+            foreach (var group in groupMaps)
+            {
+                var groupObject = _context.Groups.FirstOrDefault(x => x.GroupId == group.GroupId);
+                if (groupObject != null)
+                {
+                    groupNames.Add(groupObject.GroupName);
+                }
+            }
+            return groupNames;
+        }
+
         private void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
         {
             _context.RemoveRange(_context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId));
@@ -207,10 +230,28 @@ namespace ReleaseTool.Controllers
             }
         }
 
+        private void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
+        {
+            _context.RemoveRange(_context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId));
+            foreach (var groupName in dto.UserGroups)
+            {
+                var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName);
+                if (group != null)
+                {
+                    _context.ChangeRequestGroups.Add(new ChangeRequestGroup
+                    {
+                        ChangeRequestId = changeRequest.ChangeRequestId,
+                        GroupId = group.GroupId
+                    });
+                }
+            }
+        }
+
         private ReadChangeRequestDto ConvertToView(ChangeRequest changeRequest)
         {
             var result = _mapper.Map<ReadChangeRequestDto>(changeRequest);
             result.Tags = GetTagNames(result.ChangeRequestId);
+            result.UserGroups = GetGroupNames(result.ChangeRequestId);
             return result;
         }
 

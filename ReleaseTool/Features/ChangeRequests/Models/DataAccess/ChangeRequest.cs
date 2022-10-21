@@ -11,7 +11,6 @@ namespace ReleaseTool.Models
         public string Description { get; set; } = "";
         public string ReleaseSteps { get; set; } = "";
         public string RollbackProcedure { get; set; } = "";
-        public string NotifyEmails { get; set; } = "";
         [Required]
         public DateTime Created { get; set; }
         public Guid UserId { get; set; }

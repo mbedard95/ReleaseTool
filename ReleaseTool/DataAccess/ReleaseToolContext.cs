@@ -6,6 +6,7 @@ using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.DataAccess;
 using ReleaseTool.Features.Groups.Models.DataAccess;
+using ReleaseTool.Features.Change_Requests.Models.DataAccess;
 
 namespace ReleaseTool.DataAccess
 {
@@ -25,5 +26,6 @@ namespace ReleaseTool.DataAccess
         public DbSet<ChangeRequestTag>? ChangeRequestTags { get; set; }
         public DbSet<Group>? Groups { get; set; }
         public DbSet<UserGroup>? UserGroups { get; set; }
+        public DbSet<ChangeRequestGroup>? ChangeRequestGroups { get; set; }
     }
 }

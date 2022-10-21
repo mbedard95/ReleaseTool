@@ -31,8 +31,8 @@ namespace ReleaseTool.Controllers
             {
                 return Problem("Entity set is null.");
             }
-            return includeInactive == true ? await _context.Tags.ToListAsync()
-                : await _context.Tags.Where(x => x.TagStatus != TagStatus.Inactive).ToListAsync();
+            return includeInactive == true ? await _context.Tags.OrderBy(x => x.Name).ToListAsync()
+                : await _context.Tags.Where(x => x.TagStatus != TagStatus.Inactive).OrderBy(x => x.Name).ToListAsync();
         }
 
         // GET: api/Tags/5

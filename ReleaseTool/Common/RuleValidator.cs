@@ -53,6 +53,15 @@ namespace ReleaseTool.Common
                     return result;
                 }
             }
+            foreach (var group in dto.UserGroups)
+            {
+                if (!GroupNameExists(group))
+                {
+                    result.IsValid = false;
+                    result.Message = $"Group \"{group}\" not found";
+                    return result;
+                }
+            }
             return result;
         }
 
