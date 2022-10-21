@@ -24,10 +24,6 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Approval>>> GetApprovals(bool includeInactive)
         {
-            if (_context.Approvals == null)
-            {
-                return Problem("Entity set is null.");
-            }
             return includeInactive == true ? await _context.Approvals.ToListAsync()
                 : await _context.Approvals.Where(x => x.ApprovalStatus != ApprovalStatus.Removed).ToListAsync();
         }
@@ -36,10 +32,6 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Approval>> GetApproval(int id)
         {
-            if (_context.Approvals == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var approval = await _context.Approvals.FindAsync(id);
 
             if (approval == null)
@@ -54,10 +46,6 @@ namespace ReleaseTool.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApproval(Guid id, UpdateApprovalDto dto)
         {
-            if (_context.Approvals == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var approval = _context.Approvals.FirstOrDefault(x => x.ApprovalId == id);
             if (approval == null)
             {
@@ -90,10 +78,6 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApproval(Guid id)
         {
-            if (_context.Approvals == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var approval = await _context.Approvals.FindAsync(id);
             if (approval == null)
             {

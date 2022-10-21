@@ -27,10 +27,6 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tag>>> GetTags(bool includeInactive)
         {
-            if (_context.Tags == null)
-            {
-                return Problem("Entity set is null.");
-            }
             return includeInactive == true ? await _context.Tags.OrderBy(x => x.Name).ToListAsync()
                 : await _context.Tags.Where(x => x.TagStatus != TagStatus.Inactive).OrderBy(x => x.Name).ToListAsync();
         }
@@ -39,10 +35,6 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Tag>> GetTag(Guid id)
         {
-            if (_context.Tags == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var tag = await _context.Tags.FindAsync(id);
 
             if (tag == null)
@@ -58,11 +50,6 @@ namespace ReleaseTool.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTag(Guid id, WriteTagDto dto)
         {
-            if (_context.Tags == null)
-            {
-                return Problem("Entity set is null.");
-            }
-
             var tag = _context.Tags.FirstOrDefault(x => x.TagId == id);
             if (tag == null)
             {
@@ -94,11 +81,6 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<Tag>> PostTag(WriteTagDto dto)
         {
-            if (_context.Tags == null)
-            {
-                return Problem("Entity set is null.");
-            }
-            
             var validationResult = _validator.IsValidTag(dto);
             if (!validationResult.IsValid)
             {
@@ -119,10 +101,6 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTag(Guid id)
         {
-            if (_context.Tags == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var tag = await _context.Tags.FindAsync(id);
             if (tag == null || tag.TagStatus == TagStatus.Inactive)
             {

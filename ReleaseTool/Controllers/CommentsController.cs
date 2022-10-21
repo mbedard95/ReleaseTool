@@ -32,10 +32,6 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Comment>>> GetComments(Guid? changeRequestId)
         {
-            if (_context.Comments == null)
-            {
-                return Problem("Entity set is null.");
-            }
             return (changeRequestId != null) ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
                 : await _context.Comments.ToListAsync();
         }
@@ -44,10 +40,6 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Comment>> GetCommentDetails(Guid id)
         {
-            if (_context.Comments == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var comment = await _context.Comments.FindAsync(id);
 
             if (comment == null)
@@ -63,10 +55,6 @@ namespace ReleaseTool.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutComment(Guid id, WriteCommentDto dto)
         {
-            if (_context.Comments == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var comment = _context.Comments.FirstOrDefault(x => x.CommentId == id);
             if (comment == null)
             {
@@ -99,11 +87,6 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<Comment>> PostComment(WriteCommentDto dto)
         {
-            if (_context.Comments == null)
-            {
-                return Problem("Entity set is null.");
-            }
-
             var validationResult = _validator.IsValidComment(dto);
             if (!validationResult.IsValid)
             {
@@ -123,10 +106,6 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(Guid id)
         {
-            if (_context.Comments == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var comment = await _context.Comments.FindAsync(id);
             if (comment == null)
             {

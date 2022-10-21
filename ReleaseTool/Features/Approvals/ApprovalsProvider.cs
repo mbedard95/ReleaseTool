@@ -28,11 +28,6 @@ namespace ReleaseTool.Features.Approvals
 
         public async Task AddNewApproval(WriteApprovalDto dto)
         {
-            if (_context.Approvals == null)
-            {
-                throw new Exception("Entity set is null.");
-            }
-
             var id = Guid.NewGuid();
             var validationResult = _validator.IsValidApproval(dto);
             if (!validationResult.IsValid)

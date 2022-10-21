@@ -29,10 +29,6 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadUserDto>>> GetUsers(bool includeInactive)
         {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var users = await _context.Users.ToListAsync();
 
             return includeInactive == true ?
@@ -45,10 +41,6 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ReadUserDto>> GetUser(Guid id)
         {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -101,11 +93,6 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(WriteUserDto dto)
         {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set is null.");
-            }
-
             var id = Guid.NewGuid();
             var validationResult = _validator.IsValidUser(dto, id);
             if (!validationResult.IsValid)
@@ -126,10 +113,6 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var user = await _context.Users.FindAsync(id);
             if (user == null || user.UserStatus == UserStatus.Inactive)
             {
@@ -183,10 +166,7 @@ namespace ReleaseTool.Controllers
         private List<string> GetGroupNames(Guid userId)
         {
             List<string> groupNames = new();
-            if (_context.UserGroups == null || _context.Groups == null)
-            {
-                throw new Exception("Error mapping Groups to User");
-            }
+
             var groupMaps = _context.UserGroups.Where(x => x.UserId == userId).ToList();
             foreach (var group in groupMaps)
             {

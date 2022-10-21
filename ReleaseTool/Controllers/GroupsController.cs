@@ -27,10 +27,6 @@ namespace ReleaseTool.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Group>>> GetGroups(bool includeInactive)
         {
-            if (_context.Groups == null)
-            {
-                return Problem("Entity set is null.");
-            }
             return includeInactive == true ? await _context.Groups.ToListAsync()
                 : await _context.Groups.Where(x => x.GroupStatus != GroupStatus.Inactive).ToListAsync();
         }
@@ -39,10 +35,6 @@ namespace ReleaseTool.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Group>> GetGroups(Guid id)
         {
-            if (_context.Groups == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var group = await _context.Groups.FindAsync(id);
 
             if (group == null)
@@ -58,11 +50,6 @@ namespace ReleaseTool.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGroup(Guid id, WriteGroupDto dto)
         {
-            if (_context.Groups == null)
-            {
-                return Problem("Entity set is null.");
-            }
-
             var group = _context.Groups.FirstOrDefault(x => x.GroupId == id);
             if (group == null)
             {
@@ -94,11 +81,6 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<Group>> PostGroup(WriteGroupDto dto)
         {
-            if (_context.Groups == null)
-            {
-                return Problem("Entity set is null.");
-            }
-
             var validationResult = _validator.IsValidGroup(dto);
             if (!validationResult.IsValid)
             {
@@ -119,10 +101,6 @@ namespace ReleaseTool.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGroup(Guid id)
         {
-            if (_context.Groups == null)
-            {
-                return Problem("Entity set is null.");
-            }
             var group = await _context.Groups.FindAsync(id);
             if (group == null || group.GroupStatus == GroupStatus.Inactive)
             {
