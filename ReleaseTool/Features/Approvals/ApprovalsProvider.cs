@@ -29,7 +29,7 @@ namespace ReleaseTool.Features.Approvals
         public async Task AddNewApproval(WriteApprovalDto dto)
         {
             var id = Guid.NewGuid();
-            var validationResult = _validator.IsValidApproval(dto);
+            var validationResult = _validator.IsValidApproval(dto, true);
             if (!validationResult.IsValid)
             {
                 throw new ArgumentException(validationResult.Message);
@@ -38,7 +38,6 @@ namespace ReleaseTool.Features.Approvals
             var approval = CreateApproval(dto, id);
 
             _context.Approvals.Add(approval);
-            await _context.SaveChangesAsync();
         }
 
         private Approval CreateApproval(WriteApprovalDto dto, Guid id)

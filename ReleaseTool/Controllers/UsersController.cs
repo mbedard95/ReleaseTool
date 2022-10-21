@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
+using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
 using XSystem.Security.Cryptography;
@@ -184,7 +185,7 @@ namespace ReleaseTool.Controllers
             _context.RemoveRange(_context.UserGroups.Where(x => x.UserId == user.UserId));
             foreach (var groupName in dto.Groups)
             {
-                var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName);
+                var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName && x.GroupStatus == GroupStatus.Active);
                 if (group != null)
                 {
                     _context.UserGroups.Add(new UserGroup

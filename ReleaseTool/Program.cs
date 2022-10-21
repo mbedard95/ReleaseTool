@@ -5,6 +5,7 @@ using ReleaseTool.DataAccess;
 using System.Text.Json.Serialization;
 using ReleaseTool.Common;
 using ReleaseTool.Features.Approvals;
+using ReleaseTool.Features.ChangeRequests;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddTransient<IRuleValidator, RuleValidator>();
 builder.Services.AddTransient<IApprovalsProvider, ApprovalsProvider>();
+builder.Services.AddTransient<IChangeRequestsProvider, ChangeRequestsProvider>();
 
 var app = builder.Build();
 

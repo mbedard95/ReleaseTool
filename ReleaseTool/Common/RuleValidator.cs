@@ -107,15 +107,20 @@ namespace ReleaseTool.Common
             return result;
         }
 
-        public ValidationResult IsValidApproval(WriteApprovalDto dto)
+        public ValidationResult IsValidApproval(WriteApprovalDto dto, bool isCreate)
         {
             var result = new ValidationResult();
-            if (!ChangeRequestExists(dto.ChangeRequestId))
+
+            if (!isCreate)
             {
-                result.IsValid = false;
-                result.Message = "Change request not found.";
-                return result;
+                if (!ChangeRequestExists(dto.ChangeRequestId))
+                {
+                    result.IsValid = false;
+                    result.Message = "Change request not found.";
+                    return result;
+                }
             }
+            
             if (!UserExists(dto.UserId))
             {
                 result.IsValid = false;

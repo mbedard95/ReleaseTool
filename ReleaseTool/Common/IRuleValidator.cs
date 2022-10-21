@@ -13,7 +13,7 @@ namespace ReleaseTool.Common
         ValidationResult IsValidChangeRequest(WriteChangeRequestDto dto);
         ValidationResult IsValidTag(WriteTagDto dto);
         ValidationResult IsValidComment(WriteCommentDto dto);
-        ValidationResult IsValidApproval(WriteApprovalDto dto);
+        ValidationResult IsValidApproval(WriteApprovalDto dto, bool isCreate);
         public ValidationResult IsValidGroup(WriteGroupDto dto);
     }
 }

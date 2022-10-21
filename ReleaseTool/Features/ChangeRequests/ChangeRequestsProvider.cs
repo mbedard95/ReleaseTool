@@ -1,9 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
+using ReleaseTool.Features.Approvals;
+using ReleaseTool.Features.Approvals.Models.DataAccess;
+using ReleaseTool.Features.Approvals.Models.Dtos;
 using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
+using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.DataAccess;
+using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Features.ChangeRequests
@@ -15,19 +21,22 @@ namespace ReleaseTool.Features.ChangeRequests
         List<string> GetGroupNames(Guid changeRequestId);
         ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto);
         List<string> GetTagNames(Guid changeRequestId);
-        void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest);
-        void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest);
+        void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, Guid changeRequestId);
+        void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, Guid changeRequestId);
+        void MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId);
     }
 
     public class ChangeRequestsProvider : IChangeRequestsProvider
     {
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
+        private readonly IApprovalsProvider _approvalsProvider;
 
-        public ChangeRequestsProvider(ReleaseToolContext context, IMapper mapper)
+        public ChangeRequestsProvider(ReleaseToolContext context, IMapper mapper, IApprovalsProvider approvalsProvider)
         {
             _context = context;
             _mapper = mapper;
+            _approvalsProvider = approvalsProvider;
         }
 
         public bool ChangeRequestExists(Guid id)
@@ -65,9 +74,9 @@ namespace ReleaseTool.Features.ChangeRequests
             return groupNames;
         }
 
-        public void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
+        public void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, Guid changeRequestId)
         {
-            _context.RemoveRange(_context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId));
+            _context.RemoveRange(_context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequestId));
             foreach (var tagName in dto.Tags)
             {
                 var tag = _context.Tags.FirstOrDefault(x => x.Name == tagName);
@@ -75,16 +84,16 @@ namespace ReleaseTool.Features.ChangeRequests
                 {
                     _context.ChangeRequestTags.Add(new ChangeRequestTag
                     {
-                        ChangeRequestId = changeRequest.ChangeRequestId,
+                        ChangeRequestId = changeRequestId,
                         TagId = tag.TagId
                     });
                 }
             }
         }
 
-        public void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, ChangeRequest changeRequest)
+        public void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, Guid changeRequestId)
         {
-            _context.RemoveRange(_context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequest.ChangeRequestId));
+            _context.RemoveRange(_context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequestId));
             foreach (var groupName in dto.UserGroups)
             {
                 var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName);
@@ -92,7 +101,7 @@ namespace ReleaseTool.Features.ChangeRequests
                 {
                     _context.ChangeRequestGroups.Add(new ChangeRequestGroup
                     {
-                        ChangeRequestId = changeRequest.ChangeRequestId,
+                        ChangeRequestId = changeRequestId,
                         GroupId = group.GroupId
                     });
                 }
@@ -114,6 +123,38 @@ namespace ReleaseTool.Features.ChangeRequests
             changeRequest.ChangeRequestStatus = ChangeRequestStatus.Active;
 
             return changeRequest;
+        }
+
+        public void MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId)
+        {
+            var groupIds = _context.Groups.Where(x => x.GroupStatus == GroupStatus.Active && dto.UserGroups.Contains(x.GroupName)).Select(x => x.GroupId).ToList();
+            var userIds = _context.UserGroups.Where(x => groupIds.Contains(x.GroupId)).Select(x => x.UserId).Distinct().ToList();
+            var users = _context.Users.Where(x => x.UserStatus == UserStatus.Active && userIds.Contains(x.UserId)).ToList();
+
+            var existingApprovals = _context.Approvals.Where(x => x.ChangeRequestId == changeRequestId && x.ApprovalStatus != ApprovalStatus.Removed).ToList();
+            var usersToRemove = existingApprovals.Select(x => x.UserId).Where(x => !users.Select(x => x.UserId).Contains(x));
+            var approvalsToRemove = existingApprovals.Where(x => usersToRemove.Contains(x.UserId));
+
+            foreach (var approval in approvalsToRemove)
+            {
+                approval.ApprovalStatus = ApprovalStatus.Removed;
+                _context.Entry(approval).State = EntityState.Modified;
+            }
+
+            foreach (var user in users)
+            {
+                var existingApproval = _context.Approvals.Where(x => x.UserId == user.UserId && x.ChangeRequestId == changeRequestId && x.ApprovalStatus != ApprovalStatus.Removed).ToList();
+
+                if (!existingApproval.Any())
+                {
+                    _approvalsProvider.AddNewApproval(new WriteApprovalDto
+                    {
+                        UserId = user.UserId,
+                        ChangeRequestId = changeRequestId,
+                        EmailAddress = user.EmailAddress
+                    });
+                }              
+            }
         }
     }
 }

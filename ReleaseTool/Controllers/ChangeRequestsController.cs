@@ -78,8 +78,9 @@ namespace ReleaseTool.Controllers
 
             try
             {
-                _changeRequestsProvider.SaveChangeRequestTagMaps(dto, changeRequest);
-                _changeRequestsProvider.SaveChangeRequestGroupMaps(dto, changeRequest);
+                _changeRequestsProvider.SaveChangeRequestTagMaps(dto, changeRequest.ChangeRequestId);
+                _changeRequestsProvider.SaveChangeRequestGroupMaps(dto, changeRequest.ChangeRequestId);
+                _changeRequestsProvider.MergeApprovals(dto, changeRequest.ChangeRequestId);
 
                 await _context.SaveChangesAsync();
             }
@@ -112,8 +113,9 @@ namespace ReleaseTool.Controllers
 
             _context.ChangeRequests.Add(changeRequest);
 
-            _changeRequestsProvider.SaveChangeRequestTagMaps(dto, changeRequest);
-            _changeRequestsProvider.SaveChangeRequestGroupMaps(dto, changeRequest);
+            _changeRequestsProvider.SaveChangeRequestTagMaps(dto, changeRequest.ChangeRequestId);
+            _changeRequestsProvider.SaveChangeRequestGroupMaps(dto, changeRequest.ChangeRequestId);
+            _changeRequestsProvider.MergeApprovals(dto, changeRequest.ChangeRequestId);
 
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, _changeRequestsProvider.ConvertToView(changeRequest));
