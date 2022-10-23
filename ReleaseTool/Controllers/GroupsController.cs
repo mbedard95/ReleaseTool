@@ -5,6 +5,9 @@ using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Groups.Models.Dtos;
+using ReleaseTool.Features.Users;
+using ReleaseTool.Features.Users.Models.DataAccess;
+using ReleaseTool.Features.Users.Models.Dtos;
 
 namespace ReleaseTool.Controllers
 {
@@ -15,12 +18,14 @@ namespace ReleaseTool.Controllers
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
         private readonly IRuleValidator _validator;
+        private readonly IUsersProvider _usersProvider;
 
-        public GroupsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
+        public GroupsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator, IUsersProvider usersProvider)
         {
             _context = context;
             _mapper = mapper;
             _validator = validator;
+            _usersProvider = usersProvider;
         }
 
         // GET: api/Groups
@@ -128,9 +133,28 @@ namespace ReleaseTool.Controllers
             return NoContent();
         }
 
+        [HttpGet("Users/{id}")]
+        public ActionResult<IEnumerable<ReadUserDto>> GetUsersByGroup(Guid id)
+        {
+            if (!GroupExists(id))
+            {
+                return NotFound();
+            }
+
+            var userIds = _context.UserGroups
+                .Where(x => x.GroupId == id)
+                .ToList()
+                .Select(x => x.UserId);
+
+            return _context.Users
+                .Where(x => userIds.Contains(x.UserId) && x.UserStatus == UserStatus.Active)
+                .ToList()
+                .Select(x => _usersProvider.ConvertToView(x)).ToList();
+        }
+
         private bool GroupExists(Guid id)
         {
-            return (_context.Groups?.Any(e => e.GroupId == id)).GetValueOrDefault();
+            return (_context.Groups?.Any(e => e.GroupId == id && e.GroupStatus == GroupStatus.Active)).GetValueOrDefault();
         }
     }
 }

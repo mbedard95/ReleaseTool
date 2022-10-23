@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using ReleaseTool.Common;
 using ReleaseTool.Features.Approvals;
 using ReleaseTool.Features.ChangeRequests;
+using ReleaseTool.Features.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddTransient<IRuleValidator, RuleValidator>();
 builder.Services.AddTransient<IApprovalsProvider, ApprovalsProvider>();
 builder.Services.AddTransient<IChangeRequestsProvider, ChangeRequestsProvider>();
+builder.Services.AddTransient<IUsersProvider, UsersProvider>();
 
 var app = builder.Build();
 

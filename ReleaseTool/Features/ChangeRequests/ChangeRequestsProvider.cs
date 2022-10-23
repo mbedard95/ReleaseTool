@@ -7,6 +7,7 @@ using ReleaseTool.Features.Approvals.Models.Dtos;
 using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
+using ReleaseTool.Features.ChangeRequests.Models.Dtos;
 using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.DataAccess;
@@ -17,7 +18,7 @@ namespace ReleaseTool.Features.ChangeRequests
     public interface IChangeRequestsProvider
     {
         bool ChangeRequestExists(Guid id);
-        ReadChangeRequestDto ConvertToView(ChangeRequest changeRequest);
+        ChangeRequestDetailsDto ConvertToDetailsView(ChangeRequest changeRequest);
         List<string> GetGroupNames(Guid changeRequestId);
         ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto);
         List<string> GetTagNames(Guid changeRequestId);
@@ -108,9 +109,9 @@ namespace ReleaseTool.Features.ChangeRequests
             }
         }
 
-        public ReadChangeRequestDto ConvertToView(ChangeRequest changeRequest)
+        public ChangeRequestDetailsDto ConvertToDetailsView(ChangeRequest changeRequest)
         {
-            var result = _mapper.Map<ReadChangeRequestDto>(changeRequest);
+            var result = _mapper.Map<ChangeRequestDetailsDto>(changeRequest);
             result.Tags = GetTagNames(result.ChangeRequestId);
             result.UserGroups = GetGroupNames(result.ChangeRequestId);
             return result;

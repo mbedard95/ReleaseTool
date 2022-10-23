@@ -19,13 +19,13 @@ namespace ReleaseTool.DataAccess
         }
 
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<Approval> Approvals { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-        public DbSet<Comment> Comments { get; set; }
-        public DbSet<ChangeRequest> ChangeRequests { get; set; }
-        public DbSet<ChangeRequestTag> ChangeRequestTags { get; set; }
-        public DbSet<Group> Groups { get; set; }
-        public DbSet<UserGroup> UserGroups { get; set; }
-        public DbSet<ChangeRequestGroup> ChangeRequestGroups { get; set; }
+        public DbSet<Approval> Approvals { get; set; } = null!;
+        public DbSet<Tag> Tags { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
+        public DbSet<ChangeRequest> ChangeRequests { get; set; } = null!;
+        public DbSet<ChangeRequestTag> ChangeRequestTags { get; set; } = null!;
+        public DbSet<Group> Groups { get; set; } = null!;
+        public DbSet<UserGroup> UserGroups { get; set; } = null!;
+        public DbSet<ChangeRequestGroup> ChangeRequestGroups { get; set; } = null!;
     }
 }

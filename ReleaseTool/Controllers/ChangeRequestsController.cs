@@ -6,6 +6,7 @@ using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.ChangeRequests;
+using ReleaseTool.Features.ChangeRequests.Models.Dtos;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -39,13 +40,13 @@ namespace ReleaseTool.Controllers
 
             return includeInactive == true ? 
                 changeRequests.Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList()
-                : changeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned)
-                .Select(x => _changeRequestsProvider.ConvertToView(x)).ToList();
+                : changeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned).ToList()
+                .Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList();
         }
 
         // GET: api/ChangeRequests/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReadChangeRequestDto>> GetChangeRequest(int id)
+        public async Task<ActionResult<ChangeRequestDetailsDto>> GetChangeRequestDetails(Guid id)
         {
             var changeRequest = await _context.ChangeRequests.FindAsync(id);
 
@@ -54,7 +55,7 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            return _changeRequestsProvider.ConvertToView(changeRequest);
+            return _changeRequestsProvider.ConvertToDetailsView(changeRequest);
         }
 
         // PUT: api/ChangeRequests/5
@@ -118,7 +119,7 @@ namespace ReleaseTool.Controllers
             _changeRequestsProvider.MergeApprovals(dto, changeRequest.ChangeRequestId);
 
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, _changeRequestsProvider.ConvertToView(changeRequest));
+            return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, _changeRequestsProvider.ConvertToDetailsView(changeRequest));
         }
 
         // DELETE: api/ChangeRequests/5
