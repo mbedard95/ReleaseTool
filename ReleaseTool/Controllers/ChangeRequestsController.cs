@@ -7,6 +7,7 @@ using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.ChangeRequests;
 using ReleaseTool.Features.ChangeRequests.Models.Dtos;
+using ReleaseTool.Features.Users;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -19,17 +20,20 @@ namespace ReleaseTool.Controllers
         private readonly IMapper _mapper;
         private readonly IRuleValidator _validator;
         private readonly IChangeRequestsProvider _changeRequestsProvider;
+        private readonly IUsersProvider _usersProvider;
 
         public ChangeRequestsController(
             ReleaseToolContext context, 
             IMapper mapper, 
             IRuleValidator validator,
-            IChangeRequestsProvider changeRequestProvider)
+            IChangeRequestsProvider changeRequestProvider,
+            IUsersProvider usersProvider)
         {
             _context = context;
             _mapper = mapper;
             _validator = validator;
             _changeRequestsProvider = changeRequestProvider;
+            _usersProvider = usersProvider;
         }
 
         // GET: api/ChangeRequests
@@ -38,14 +42,18 @@ namespace ReleaseTool.Controllers
         {
             var changeRequests = await _context.ChangeRequests.ToListAsync();
 
-            return includeInactive == true ? 
+            var mapped = includeInactive == true ? 
                 changeRequests.Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList()
                 : changeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned).ToList()
                 .Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList();
+
+            mapped.ForEach(x => x.UserDisplayName = _usersProvider.GetDisplayName(x.UserId));
+
+            return mapped.OrderByDescending(x => x.Created).ToList();
         }
 
         // GET: api/ChangeRequests/5
-        [HttpGet("{id}")]
+        [HttpGet("Details/{id}")]
         public async Task<ActionResult<ChangeRequestDetailsDto>> GetChangeRequestDetails(Guid id)
         {
             var changeRequest = await _context.ChangeRequests.FindAsync(id);
@@ -119,7 +127,7 @@ namespace ReleaseTool.Controllers
             _changeRequestsProvider.MergeApprovals(dto, changeRequest.ChangeRequestId);
 
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetChangeRequest", new { id = changeRequest.ChangeRequestId }, _changeRequestsProvider.ConvertToDetailsView(changeRequest));
+            return CreatedAtAction("GetChangeRequestDetails", new { id = changeRequest.ChangeRequestId }, _changeRequestsProvider.ConvertToDetailsView(changeRequest));
         }
 
         // DELETE: api/ChangeRequests/5
@@ -134,6 +142,7 @@ namespace ReleaseTool.Controllers
 
             changeRequest.ChangeRequestStatus = ChangeRequestStatus.Abandoned;
             _context.Entry(changeRequest).State = EntityState.Modified;
+            _changeRequestsProvider.DeleteApprovals(id);
 
             try
             {

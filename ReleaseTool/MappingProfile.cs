@@ -10,6 +10,7 @@ using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Groups.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
+using ReleaseTool.Features.Users;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
 using ReleaseTool.Models;
@@ -32,7 +33,8 @@ namespace ReleaseTool
             CreateMap<UpdateApprovalDto, Approval>();
             
             CreateMap<WriteChangeRequestDto, ChangeRequest>();
-            CreateMap<ChangeRequest, ReadChangeRequestDto>();
+            CreateMap<ChangeRequest, ReadChangeRequestDto>()
+                .ForMember(dest => dest.UserDisplayName, opts => opts.Ignore());
             CreateMap<ChangeRequest, ChangeRequestDetailsDto>();
 
             CreateMap<WriteGroupDto, Group>();

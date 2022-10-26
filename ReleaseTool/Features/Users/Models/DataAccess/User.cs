@@ -16,16 +16,16 @@ namespace ReleaseTool.Features.Users.Models.DataAccess
         [Required]
         public DateTime Created { get; set; }
         public UserPermissions UserPermissions { get; set; }
+        public bool IsActiveUser { get; set; }
     }
 
-    [Flags]
+
     public enum UserPermissions
     {
-        ReadRequest = 1,
-        CommentRequest = 2,
-        WriteRequest = 4,
-        ApproveRequest = 8,
-        ManageUsers = 16
+        ReadOnly,
+        ReadAndWriteOnly,
+        Approver,
+        Admin
     }
 
     public enum UserStatus

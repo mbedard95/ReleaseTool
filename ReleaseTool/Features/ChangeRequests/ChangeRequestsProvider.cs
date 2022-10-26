@@ -9,7 +9,9 @@ using ReleaseTool.Features.Change_Requests.Models.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.ChangeRequests.Models.Dtos;
 using ReleaseTool.Features.Groups.Models.DataAccess;
+using ReleaseTool.Features.Groups.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
+using ReleaseTool.Features.Tags.Models.Dtos;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Models;
 
@@ -19,12 +21,13 @@ namespace ReleaseTool.Features.ChangeRequests
     {
         bool ChangeRequestExists(Guid id);
         ChangeRequestDetailsDto ConvertToDetailsView(ChangeRequest changeRequest);
-        List<string> GetGroupNames(Guid changeRequestId);
+        List<ReadGroupDto> GetGroupNames(Guid changeRequestId);
         ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto);
-        List<string> GetTagNames(Guid changeRequestId);
+        List<ReadTagDto> GetTagNames(Guid changeRequestId);
         void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         void MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId);
+        void DeleteApprovals(Guid changeRequestId);
     }
 
     public class ChangeRequestsProvider : IChangeRequestsProvider
@@ -45,31 +48,39 @@ namespace ReleaseTool.Features.ChangeRequests
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
         }
 
-        public List<string> GetTagNames(Guid changeRequestId)
+        public List<ReadTagDto> GetTagNames(Guid changeRequestId)
         {
-            List<string> tagNames = new();
+            List<ReadTagDto> tagNames = new();
             var tagMaps = _context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequestId).ToList();
             foreach (var tag in tagMaps)
             {
                 var tagObject = _context.Tags.FirstOrDefault(x => x.TagId == tag.TagId);
-                if (tagObject != null)
+                if (tagObject != null && tagObject.TagStatus == TagStatus.Active)
                 {
-                    tagNames.Add(tagObject.Name);
+                    tagNames.Add(new ReadTagDto
+                    {
+                        TagId = tagObject.TagId,
+                        TagName = tagObject.Name
+                    });
                 }
             }
             return tagNames;
         }
 
-        public List<string> GetGroupNames(Guid changeRequestId)
+        public List<ReadGroupDto> GetGroupNames(Guid changeRequestId)
         {
-            List<string> groupNames = new();
+            List<ReadGroupDto> groupNames = new();
             var groupMaps = _context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequestId).ToList();
             foreach (var group in groupMaps)
             {
                 var groupObject = _context.Groups.FirstOrDefault(x => x.GroupId == group.GroupId);
-                if (groupObject != null)
+                if (groupObject != null && groupObject.GroupStatus == GroupStatus.Active)
                 {
-                    groupNames.Add(groupObject.GroupName);
+                    groupNames.Add(new ReadGroupDto
+                    {
+                        GroupId = groupObject.GroupId,
+                        GroupName = groupObject.GroupName
+                    });
                 }
             }
             return groupNames;
@@ -80,7 +91,7 @@ namespace ReleaseTool.Features.ChangeRequests
             _context.RemoveRange(_context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequestId));
             foreach (var tagName in dto.Tags)
             {
-                var tag = _context.Tags.FirstOrDefault(x => x.Name == tagName);
+                var tag = _context.Tags.FirstOrDefault(x => x.Name == tagName && x.TagStatus == TagStatus.Active);
                 if (tag != null)
                 {
                     _context.ChangeRequestTags.Add(new ChangeRequestTag
@@ -97,7 +108,7 @@ namespace ReleaseTool.Features.ChangeRequests
             _context.RemoveRange(_context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequestId));
             foreach (var groupName in dto.UserGroups)
             {
-                var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName);
+                var group = _context.Groups.FirstOrDefault(x => x.GroupName == groupName && x.GroupStatus == GroupStatus.Active);
                 if (group != null)
                 {
                     _context.ChangeRequestGroups.Add(new ChangeRequestGroup
@@ -156,6 +167,13 @@ namespace ReleaseTool.Features.ChangeRequests
                     });
                 }              
             }
+        }
+
+        public void DeleteApprovals(Guid changeRequestId)
+        {
+            var existingApprovals = _context.Approvals.Where(x => x.ChangeRequestId == changeRequestId && x.ApprovalStatus != ApprovalStatus.Removed).ToList();
+
+            existingApprovals.ForEach(x => x.ApprovalStatus = ApprovalStatus.Removed);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace ReleaseTool.Features.Users
         User GetNewUser(WriteUserDto dto, Guid id);
         void SaveUserGroupMaps(WriteUserDto dto, User user);
         bool UserExists(Guid id);
+        string GetDisplayName(Guid id);
     }
 
     public class UsersProvider : IUsersProvider
@@ -87,8 +88,17 @@ namespace ReleaseTool.Features.Users
         public ReadUserDto ConvertToView(User user)
         {
             var result = _mapper.Map<ReadUserDto>(user);
-            result.Groups = GetGroupNames(result.UserId);
             return result;
+        }
+
+        public string GetDisplayName(Guid id)
+        {
+            var user = _context.Users.Find(id);
+            if (user == null)
+            {
+                return "Unknown User";
+            }
+            return $"{user.FirstName} {user.LastName}";
         }
     }
 }
