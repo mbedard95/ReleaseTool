@@ -10,7 +10,7 @@ namespace ReleaseTool.Features.Users.Models.Dtos
         public string LastName { get; set; } = "";
         public UserStatus UserStatus { get; set; }
         public DateTime Created { get; set; }
-        public UserPermissions UserPermissions { get; set; }
+        public UserProfile UserProfile { get; set; }
         public List<string> Groups { get; set; } = new List<string>();
     }
 }

@@ -15,12 +15,12 @@ namespace ReleaseTool.Features.Users.Models.DataAccess
         public UserStatus UserStatus { get; set; }       
         [Required]
         public DateTime Created { get; set; }
-        public UserPermissions UserPermissions { get; set; }
+        public UserProfile UserProfile { get; set; }
         public bool IsActiveUser { get; set; }
     }
 
 
-    public enum UserPermissions
+    public enum UserProfile
     {
         ReadOnly,
         ReadAndWriteOnly,

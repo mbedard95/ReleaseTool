@@ -53,6 +53,22 @@ namespace ReleaseTool.Controllers
             return _usersProvider.ConvertToView(user);
         }
 
+        [HttpGet("ActiveUser")]
+        public async Task<ActionResult<ReadUserDto>> GetActiveUser()
+        {
+            var active = await _context.Users.Where(x => x.IsActiveUser).ToListAsync();
+            if (active.Count > 1)
+            {
+                return Problem("More than one user cannot be active at a time");
+            }
+            if (!active.Any())
+            {
+                return NotFound();
+            }
+
+            return _usersProvider.ConvertToView(active.Single());
+        }
+
         // PUT: api/Users/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(Guid id, WriteUserDto dto)
@@ -87,6 +103,26 @@ namespace ReleaseTool.Controllers
                     throw;
                 }
             }
+
+            return NoContent();
+        }
+
+        [HttpPut("ActiveUser/{id}")]
+        public async Task<IActionResult> SetActiveUser(Guid id)
+        {
+            var user = _context.Users.FirstOrDefault(x => x.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var activeUser = _context.Users.FirstOrDefault(x => x.IsActiveUser);
+            if (activeUser != null)
+            {
+                activeUser.IsActiveUser = false;
+            }
+            user.IsActiveUser = true;
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
