@@ -94,7 +94,7 @@ namespace ReleaseTool.Controllers
             }
 
             var comment = _mapper.Map<Comment>(dto);
-            comment.Created = DateTime.Now;
+            comment.Created = DateTime.UtcNow;
 
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();

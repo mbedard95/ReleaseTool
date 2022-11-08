@@ -20,7 +20,8 @@ namespace ReleaseTool.Models
     public enum ChangeRequestStatus
     {
         Active,
-        Complete,
+        Approved,
+        Deployed,
         Abandoned
     }
 }

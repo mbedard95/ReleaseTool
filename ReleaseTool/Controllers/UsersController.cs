@@ -41,7 +41,7 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReadUserDto>> GetUser(Guid id)
+        public async Task<ActionResult<UserDetailsDto>> GetUser(Guid id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -50,7 +50,7 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            return _usersProvider.ConvertToView(user);
+            return _usersProvider.ConvertToDetailsView(user);
         }
 
         [HttpGet("ActiveUser")]

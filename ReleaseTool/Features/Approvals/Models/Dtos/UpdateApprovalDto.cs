@@ -5,6 +5,6 @@ namespace ReleaseTool.Features.Approvals.Models.Dtos
     public class UpdateApprovalDto
     {
         public ApprovalStatus ApprovalStatus { get; set; }
-        public string EmailAddress { get; set; } = "";
+        public Guid UserId { get; set; }
     }
 }

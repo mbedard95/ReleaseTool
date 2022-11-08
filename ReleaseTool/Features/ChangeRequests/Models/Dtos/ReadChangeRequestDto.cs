@@ -1,4 +1,5 @@
 ﻿using ReleaseTool.Features.Tags.Models.DataAccess;
+using ReleaseTool.Models;
 
 namespace ReleaseTool.Features.Change_Requests.Models
 {
@@ -9,5 +10,6 @@ namespace ReleaseTool.Features.Change_Requests.Models
         public DateTime Created { get; set; }
         public Guid UserId { get; set; }
         public string UserDisplayName { get; set; } = "";
+        public ChangeRequestStatus ChangeRequestStatus { get; set; }
     }
 }

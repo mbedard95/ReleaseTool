@@ -16,6 +16,7 @@ namespace ReleaseTool.Features.Users
         void SaveUserGroupMaps(WriteUserDto dto, User user);
         bool UserExists(Guid id);
         string GetDisplayName(Guid id);
+        UserDetailsDto ConvertToDetailsView(User user);
     }
 
     public class UsersProvider : IUsersProvider
@@ -35,7 +36,7 @@ namespace ReleaseTool.Features.Users
 
             newUser.UserId = id;
             newUser.UserStatus = UserStatus.Active;
-            newUser.Created = DateTime.Now;
+            newUser.Created = DateTime.UtcNow;
 
             return newUser;
         }
@@ -91,6 +92,13 @@ namespace ReleaseTool.Features.Users
             return result;
         }
 
+        public UserDetailsDto ConvertToDetailsView(User user)
+        {
+            var result = _mapper.Map<UserDetailsDto>(user);
+            result.Groups = GetGroupsForUser(user.UserId);
+            return result;
+        }
+
         public string GetDisplayName(Guid id)
         {
             var user = _context.Users.Find(id);
@@ -99,6 +107,14 @@ namespace ReleaseTool.Features.Users
                 return "Unknown User";
             }
             return $"{user.FirstName} {user.LastName}";
+        }
+
+        private List<string> GetGroupsForUser(Guid userId)
+        {
+            var groupIds = _context.UserGroups.Where(x => x.UserId == userId)
+                .Select(x => x.GroupId).ToList();
+            return _context.Groups.Where(x => groupIds.Contains(x.GroupId))
+                .Select(x => x.GroupName).ToList();
         }
     }
 }

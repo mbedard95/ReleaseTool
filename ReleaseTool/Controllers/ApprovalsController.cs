@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Approvals.Models.Dtos;
+using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
 {
@@ -22,10 +23,13 @@ namespace ReleaseTool.Controllers
 
         // GET: api/Approvals
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Approval>>> GetApprovals(bool includeInactive)
+        public async Task<ActionResult<IEnumerable<Approval>>> GetApprovals(Guid changeRequestId)
         {
-            return includeInactive == true ? await _context.Approvals.ToListAsync()
-                : await _context.Approvals.Where(x => x.ApprovalStatus != ApprovalStatus.Removed).ToListAsync();
+            return changeRequestId == Guid.Empty ? await _context.Approvals.ToListAsync()
+                : await _context.Approvals
+                .Where(x => x.ApprovalStatus != ApprovalStatus.Removed
+                && x.ChangeRequestId == changeRequestId)
+                .ToListAsync();
         }
 
         // GET: api/Approvals/5
@@ -46,14 +50,20 @@ namespace ReleaseTool.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApproval(Guid id, UpdateApprovalDto dto)
         {
-            var approval = _context.Approvals.FirstOrDefault(x => x.ApprovalId == id);
+            var approval = _context.Approvals.FirstOrDefault(x => x.ApprovalId == id && x.UserId == dto.UserId);
             if (approval == null)
             {
                 return NotFound();
             }
 
+            if (approval.ApprovalStatus != ApprovalStatus.Approved
+                && dto.ApprovalStatus == ApprovalStatus.Approved)
+            {
+                approval.ApprovedDate = DateTime.UtcNow;
+            }
             approval = _mapper.Map(dto, approval);
             _context.Entry(approval).State = EntityState.Modified;
+            UpdateChangeRequest(approval.ChangeRequestId, approval.ApprovalId, dto);
 
             try
             {
@@ -95,6 +105,26 @@ namespace ReleaseTool.Controllers
             return (_context.Approvals?.Any(e => e.ApprovalId == id)).GetValueOrDefault();
         }
 
-        
+        private void UpdateChangeRequest(Guid changeRequestId, Guid approvalId, UpdateApprovalDto dto)
+        {
+            var changeRequest = _context.ChangeRequests.Find(changeRequestId);
+            if (dto.ApprovalStatus == ApprovalStatus.Approved && changeRequest != null)
+            {
+                var approvalsList = _context.Approvals
+                    .Where(x => x.ChangeRequestId == changeRequestId && x.ApprovalId != approvalId)
+                    .ToList();
+                var approved = approvalsList.Where(x => x.ApprovalStatus == ApprovalStatus.Approved).ToList();
+                var denied = approvalsList.Where(x => x.ApprovalStatus == ApprovalStatus.Denied).ToList();
+
+                if (denied.Any())
+                {
+                    return;
+                }
+                if (approved.Count >= 1)
+                {
+                    changeRequest.ChangeRequestStatus = ChangeRequestStatus.Approved;
+                }
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.ChangeRequests;
 using ReleaseTool.Features.ChangeRequests.Models.Dtos;
 using ReleaseTool.Features.Users;
+using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Models;
 
 namespace ReleaseTool.Controllers
@@ -112,6 +113,11 @@ namespace ReleaseTool.Controllers
         [HttpPost]
         public async Task<ActionResult<ChangeRequest>> PostChangeRequest(WriteChangeRequestDto dto)
         {
+            var user = _context.Users.FirstOrDefault(x => x.UserId == dto.UserId);
+            if (user == null || user.UserProfile != UserProfile.ReadAndWriteOnly)
+            {
+                return BadRequest("Access Denied");
+            }
             var validationResult = _validator.IsValidChangeRequest(dto);
             if (!validationResult.IsValid)
             {
@@ -142,7 +148,6 @@ namespace ReleaseTool.Controllers
 
             changeRequest.ChangeRequestStatus = ChangeRequestStatus.Abandoned;
             _context.Entry(changeRequest).State = EntityState.Modified;
-            _changeRequestsProvider.DeleteApprovals(id);
 
             try
             {

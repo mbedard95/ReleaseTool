@@ -93,7 +93,7 @@ namespace ReleaseTool.Controllers
             }
 
             var group = _mapper.Map<Group>(dto);
-            group.Created = DateTime.Now;
+            group.Created = DateTime.UtcNow;
             group.GroupStatus = GroupStatus.Active;
 
             _context.Groups.Add(group);

@@ -88,7 +88,7 @@ namespace ReleaseTool.Controllers
             }
 
             var tag = _mapper.Map<Tag>(dto);
-            tag.Created = DateTime.Now;
+            tag.Created = DateTime.UtcNow;
             tag.TagStatus = TagStatus.Active;
 
             _context.Tags.Add(tag);

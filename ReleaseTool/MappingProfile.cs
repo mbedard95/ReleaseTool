@@ -10,7 +10,6 @@ using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Groups.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
-using ReleaseTool.Features.Users;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
 using ReleaseTool.Models;
@@ -24,6 +23,7 @@ namespace ReleaseTool
             CreateMap<WriteUserDto, User>()
                 .ForMember(dest => dest.Password, opts => opts.Ignore());
             CreateMap<User, ReadUserDto>();
+            CreateMap<User, UserDetailsDto>();
             
             CreateMap<WriteTagDto, Tag>();
             
@@ -31,6 +31,7 @@ namespace ReleaseTool
             
             CreateMap<WriteApprovalDto, Approval>();
             CreateMap<UpdateApprovalDto, Approval>();
+            CreateMap<Approval, ReadApprovalDto>();
             
             CreateMap<WriteChangeRequestDto, ChangeRequest>();
             CreateMap<ChangeRequest, ReadChangeRequestDto>()

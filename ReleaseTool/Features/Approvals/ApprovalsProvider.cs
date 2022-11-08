@@ -37,7 +37,7 @@ namespace ReleaseTool.Features.Approvals
 
             var approval = CreateApproval(dto, id);
 
-            _context.Approvals.Add(approval);
+            await _context.Approvals.AddAsync(approval);
         }
 
         private Approval CreateApproval(WriteApprovalDto dto, Guid id)
@@ -45,7 +45,7 @@ namespace ReleaseTool.Features.Approvals
             var approval = _mapper.Map<Approval>(dto);
             approval.ApprovalStatus = ApprovalStatus.Pending;
             approval.ApprovedDate = DateTime.MaxValue;
-            approval.Created = DateTime.Now;
+            approval.Created = DateTime.UtcNow;
 
             return approval;
         }

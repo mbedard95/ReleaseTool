@@ -4,7 +4,6 @@ using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Approvals;
 using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Approvals.Models.Dtos;
-using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.DataAccess;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.ChangeRequests.Models.Dtos;
@@ -21,13 +20,11 @@ namespace ReleaseTool.Features.ChangeRequests
     {
         bool ChangeRequestExists(Guid id);
         ChangeRequestDetailsDto ConvertToDetailsView(ChangeRequest changeRequest);
-        List<ReadGroupDto> GetGroupNames(Guid changeRequestId);
         ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto);
         List<ReadTagDto> GetTagNames(Guid changeRequestId);
         void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         void MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId);
-        void DeleteApprovals(Guid changeRequestId);
     }
 
     public class ChangeRequestsProvider : IChangeRequestsProvider
@@ -124,14 +121,14 @@ namespace ReleaseTool.Features.ChangeRequests
         {
             var result = _mapper.Map<ChangeRequestDetailsDto>(changeRequest);
             result.Tags = GetTagNames(result.ChangeRequestId);
-            result.UserGroups = GetGroupNames(result.ChangeRequestId);
+            result.Approvals = GetApprovals(result.ChangeRequestId);
             return result;
         }
 
         public ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto)
         {
             var changeRequest = _mapper.Map<ChangeRequest>(dto);
-            changeRequest.Created = DateTime.Now;
+            changeRequest.Created = DateTime.UtcNow;
             changeRequest.ChangeRequestStatus = ChangeRequestStatus.Active;
 
             return changeRequest;
@@ -169,11 +166,32 @@ namespace ReleaseTool.Features.ChangeRequests
             }
         }
 
-        public void DeleteApprovals(Guid changeRequestId)
+        private List<ReadApprovalDto> GetApprovals(Guid changeRequestId)
         {
-            var existingApprovals = _context.Approvals.Where(x => x.ChangeRequestId == changeRequestId && x.ApprovalStatus != ApprovalStatus.Removed).ToList();
+            var approvalsList = new List<ReadApprovalDto>();
 
-            existingApprovals.ForEach(x => x.ApprovalStatus = ApprovalStatus.Removed);
+            var approvals = _context.Approvals
+                .Where(x => x.ChangeRequestId == changeRequestId 
+                && x.ApprovalStatus != ApprovalStatus.Removed).ToList();
+            foreach (var approval in approvals)
+            {
+                var dto = _mapper.Map<ReadApprovalDto>(approval);
+                var user = _context.Users.Find(approval.UserId);
+                if (user != null)
+                {
+                    dto.FirstName = user.FirstName;
+                    dto.LastName = user.LastName;                   
+                }  
+                else
+                {
+                    dto.FirstName = "Unknown";
+                    dto.LastName = "User";
+                }
+                approvalsList.Add(dto);
+            }
+            return approvalsList
+                .OrderBy(x => x.ApprovalStatus)
+                .ThenBy(x => x.LastName).ToList();
         }
     }
 }
