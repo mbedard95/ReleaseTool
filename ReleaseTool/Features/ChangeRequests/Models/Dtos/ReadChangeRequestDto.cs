@@ -10,6 +10,7 @@ namespace ReleaseTool.Features.Change_Requests.Models
         public DateTime Created { get; set; }
         public Guid UserId { get; set; }
         public string UserDisplayName { get; set; } = "";
+        public string UserEmail { get; set; } = "";
         public ChangeRequestStatus ChangeRequestStatus { get; set; }
     }
 }

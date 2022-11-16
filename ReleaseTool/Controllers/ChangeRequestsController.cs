@@ -7,6 +7,7 @@ using ReleaseTool.Features.Change_Requests.Models;
 using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.ChangeRequests;
 using ReleaseTool.Features.ChangeRequests.Models.Dtos;
+using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Users;
 using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Models;
@@ -43,14 +44,75 @@ namespace ReleaseTool.Controllers
         {
             var changeRequests = await _context.ChangeRequests.ToListAsync();
 
-            var mapped = includeInactive == true ? 
+            var mapped = includeInactive == true ?
                 changeRequests.Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList()
                 : changeRequests.Where(x => x.ChangeRequestStatus != ChangeRequestStatus.Abandoned).ToList()
                 .Select(x => _mapper.Map<ReadChangeRequestDto>(x)).ToList();
 
-            mapped.ForEach(x => x.UserDisplayName = _usersProvider.GetDisplayName(x.UserId));
+            foreach (var changeRequest in mapped)
+            {
+                
+            }
+            mapped.ForEach(x =>
+            {
+                var attributes = _usersProvider.GetUserAttributes(x.UserId);
+                x.UserDisplayName = attributes.DisplayName;
+                x.UserEmail = attributes.Email;
+            });
 
             return mapped.OrderByDescending(x => x.Created).ToList();
+        }
+
+        // POST: api/SearchChangeRequests
+        [HttpPost("SearchChangeRequests")]
+        public async Task<ActionResult<IEnumerable<ReadChangeRequestDto>>> SearchChangeRequests(SearchChangeRequestsDto dto)
+        {
+            var changeRequests = await _context.ChangeRequests.ToListAsync();
+
+            var mapped = changeRequests.Select(x => _mapper.Map<ReadChangeRequestDto>(x)).AsEnumerable();
+
+            if (dto.Statuses.Any())
+            {
+                mapped = mapped.Where(x => dto.Statuses.Contains(x.ChangeRequestStatus));
+            }
+
+            if (dto.Title != null)
+            {
+                mapped = mapped.Where(x => x.Title.Contains(dto.Title));
+            }
+
+            if (dto.Tags.Any())
+            {
+                foreach (var tag in dto.Tags)
+                {
+                    var tagId = _context.Tags.Where(x => x.Name == tag && x.TagStatus != TagStatus.Inactive).Single().TagId;
+                    var tagMaps = _context.ChangeRequestTags.Where(x => x.TagId == tagId && mapped.Select(x => x.ChangeRequestId).Contains(x.ChangeRequestId)).ToList();
+                    mapped = mapped.Where(x => tagMaps.Where(y => y.ChangeRequestId == x.ChangeRequestId).Any());
+                }
+            }
+
+            if (dto.StartDate != null)
+            {
+                mapped = mapped.Where(x => x.Created > dto.StartDate);
+            }
+            if (dto.EndDate != null)
+            {
+                mapped = mapped.Where(x => x.Created < dto.EndDate);
+            }
+
+            var mappedList = mapped.ToList();
+            mappedList.ForEach(x =>
+            {
+                var attributes = _usersProvider.GetUserAttributes(x.UserId);
+                x.UserDisplayName = attributes.DisplayName;
+                x.UserEmail = attributes.Email;
+            });
+            if (dto.Email != null)
+            {
+                mappedList = mappedList.Where(x => x.UserEmail.Contains(dto.Email)).ToList();
+            }
+
+            return mappedList.OrderByDescending(x => x.Created).ToList();
         }
 
         // GET: api/ChangeRequests/5

@@ -15,7 +15,7 @@ namespace ReleaseTool.Features.Users
         User GetNewUser(WriteUserDto dto, Guid id);
         void SaveUserGroupMaps(WriteUserDto dto, User user);
         bool UserExists(Guid id);
-        string GetDisplayName(Guid id);
+        (string DisplayName, string Email) GetUserAttributes(Guid id);
         UserDetailsDto ConvertToDetailsView(User user);
     }
 
@@ -99,14 +99,14 @@ namespace ReleaseTool.Features.Users
             return result;
         }
 
-        public string GetDisplayName(Guid id)
+        public (string, string) GetUserAttributes(Guid id)
         {
             var user = _context.Users.Find(id);
             if (user == null)
             {
-                return "Unknown User";
+                return ("Unknown User", "Unknown Email");
             }
-            return $"{user.FirstName} {user.LastName}";
+            return ($"{user.FirstName} {user.LastName}", user.EmailAddress);
         }
 
         private List<string> GetGroupsForUser(Guid userId)
