@@ -99,6 +99,16 @@ namespace ReleaseTool.Controllers
             {
                 mapped = mapped.Where(x => x.Created < dto.EndDate);
             }
+            if (dto.AssignedToActiveUser)
+            {
+                var activeUser = _context.Users.FirstOrDefault(x => x.IsActiveUser);
+                if (activeUser == null)
+                {
+                    throw new Exception("Active user not selected");
+                }
+                var changeRequestIdsForUser = _context.Approvals.Where(x => x.EmailAddress == activeUser.EmailAddress).Select(x => x.ChangeRequestId).ToList();
+                mapped = mapped.Where(x => changeRequestIdsForUser.Contains(x.ChangeRequestId));
+            }
 
             var mappedList = mapped.ToList();
             mappedList.ForEach(x =>
@@ -110,7 +120,7 @@ namespace ReleaseTool.Controllers
             if (dto.Email != null)
             {
                 mappedList = mappedList.Where(x => x.UserEmail.Contains(dto.Email)).ToList();
-            }
+            }            
 
             return mappedList.OrderByDescending(x => x.Created).ToList();
         }
