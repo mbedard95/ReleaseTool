@@ -24,7 +24,7 @@ namespace ReleaseTool.Features.ChangeRequests
         List<ReadTagDto> GetTagNames(Guid changeRequestId);
         void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, Guid changeRequestId);
-        void MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId);
+        Task MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId);
     }
 
     public class ChangeRequestsProvider : IChangeRequestsProvider
@@ -134,7 +134,7 @@ namespace ReleaseTool.Features.ChangeRequests
             return changeRequest;
         }
 
-        public void MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId)
+        public async Task MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId)
         {
             var groupIds = _context.Groups.Where(x => x.GroupStatus == GroupStatus.Active && dto.UserGroups.Contains(x.GroupName)).Select(x => x.GroupId).ToList();
             var userIds = _context.UserGroups.Where(x => groupIds.Contains(x.GroupId)).Select(x => x.UserId).Distinct().ToList();
@@ -156,12 +156,13 @@ namespace ReleaseTool.Features.ChangeRequests
 
                 if (!existingApproval.Any())
                 {
-                    _approvalsProvider.AddNewApproval(new WriteApprovalDto
+                    await _approvalsProvider.AddNewApprovalAsync(new WriteApprovalDto
                     {
                         UserId = user.UserId,
                         ChangeRequestId = changeRequestId,
                         EmailAddress = user.EmailAddress
                     });
+                    await _approvalsProvider.SendApprovalEmailAsync(user);
                 }              
             }
         }

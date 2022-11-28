@@ -7,6 +7,7 @@ using ReleaseTool.Common;
 using ReleaseTool.Features.Approvals;
 using ReleaseTool.Features.ChangeRequests;
 using ReleaseTool.Features.Users;
+using ReleaseTool.Common.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
 builder.Services.AddTransient<IRuleValidator, RuleValidator>();
 builder.Services.AddTransient<IApprovalsProvider, ApprovalsProvider>();
 builder.Services.AddTransient<IChangeRequestsProvider, ChangeRequestsProvider>();
