@@ -9,6 +9,7 @@ using ReleaseTool.Common.Email;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Approvals.Models.DataAccess;
 using ReleaseTool.Features.Approvals.Models.Dtos;
+using ReleaseTool.Features.Change_Requests.Models.Dtos;
 using ReleaseTool.Features.Users.Models.DataAccess;
 
 namespace ReleaseTool.Features.Approvals
@@ -16,7 +17,7 @@ namespace ReleaseTool.Features.Approvals
     public interface IApprovalsProvider
     {
         Task AddNewApprovalAsync(WriteApprovalDto dto);
-        Task SendApprovalEmailAsync(User user);
+        Task SendApprovalEmailAsync(User user, WriteChangeRequestDto dto);
     }
 
     public class ApprovalsProvider : IApprovalsProvider
@@ -52,19 +53,28 @@ namespace ReleaseTool.Features.Approvals
             await _context.Approvals.AddAsync(approval);
         }
 
-        public async Task SendApprovalEmailAsync(User user)
+        public async Task SendApprovalEmailAsync(User user, WriteChangeRequestDto dto)
         {
             var email = new MimeMessage
             {
                 Sender = MailboxAddress.Parse(_config.From)
             };
             email.To.Add(MailboxAddress.Parse(user.EmailAddress));
-            email.Subject = $"You have a new change request to view";
+            email.Subject = $"New Change Request: {dto.Title}";
             var builder = new BodyBuilder
             {
-                HtmlBody = $"<h3>Hi {user.FirstName} {user.LastName},</h3></br></br>" +
-                $"You have a new change request to review. </br>" +
-                $"Please <a href='http://localhost:8080/#/viewchangerequests'>click here</a> to view it."
+                HtmlBody = $"<p>Hi {user.FirstName} {user.LastName},</p>" +
+                $"<p>You have a new change request to review. Please <a href='http://localhost:8080/#/viewchangerequests'>click here</a> to view it.</p>" +
+                $"<h3>Title</h3>" +
+                $"<p>{dto.Title}</p>" +
+                $"<h3>Description</h3>" +
+                $@"<p style=""white-space: pre-line;"">{dto.Description}</p>" +
+                $"<h3>Release Steps</h3>" +
+                $@"<p style=""white-space: pre-line;"">{dto.ReleaseSteps}</p>" +
+                $"<h3>Rollback Procedure</h3>" +
+                $@"<p style=""white-space: pre-line;"">{dto.RollbackProcedure}</p>" +
+                $"<p>Regards,</p>" +
+                $"Capstone Release Tool"
             };
             email.Body = builder.ToMessageBody();
 

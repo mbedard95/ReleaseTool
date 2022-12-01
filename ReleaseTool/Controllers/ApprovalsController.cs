@@ -61,6 +61,11 @@ namespace ReleaseTool.Controllers
             {
                 approval.ApprovedDate = DateTime.UtcNow;
             }
+            if (approval.ApprovalStatus == ApprovalStatus.Approved
+                && dto.ApprovalStatus != ApprovalStatus.Approved)
+            {
+                approval.ApprovedDate = DateTime.MaxValue;
+            }
             approval = _mapper.Map(dto, approval);
             _context.Entry(approval).State = EntityState.Modified;
             UpdateChangeRequest(approval.ChangeRequestId, approval.ApprovalId, dto);
@@ -108,7 +113,7 @@ namespace ReleaseTool.Controllers
         private void UpdateChangeRequest(Guid changeRequestId, Guid approvalId, UpdateApprovalDto dto)
         {
             var changeRequest = _context.ChangeRequests.Find(changeRequestId);
-            if (dto.ApprovalStatus == ApprovalStatus.Approved && changeRequest != null)
+            if (changeRequest != null)
             {
                 var approvalsList = _context.Approvals
                     .Where(x => x.ChangeRequestId == changeRequestId && x.ApprovalId != approvalId)
@@ -116,13 +121,17 @@ namespace ReleaseTool.Controllers
                 var approved = approvalsList.Where(x => x.ApprovalStatus == ApprovalStatus.Approved).ToList();
                 var denied = approvalsList.Where(x => x.ApprovalStatus == ApprovalStatus.Denied).ToList();
 
-                if (denied.Any())
+                if (dto.ApprovalStatus == ApprovalStatus.Denied || denied.Any())
                 {
-                    return;
+                    changeRequest.ChangeRequestStatus = ChangeRequestStatus.Blocked;
                 }
-                if (approved.Count >= 1)
+                else if (approved.Count >= 1)
                 {
                     changeRequest.ChangeRequestStatus = ChangeRequestStatus.Approved;
+                }
+                else
+                {
+                    changeRequest.ChangeRequestStatus = ChangeRequestStatus.Active;
                 }
             }
         }

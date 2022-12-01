@@ -22,6 +22,7 @@ namespace ReleaseTool.Models
         Active,
         Approved,
         Deployed,
-        Abandoned
+        Abandoned,
+        Blocked
     }
 }

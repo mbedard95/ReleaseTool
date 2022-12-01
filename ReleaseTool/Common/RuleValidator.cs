@@ -6,6 +6,7 @@ using ReleaseTool.Features.Groups.Models.DataAccess;
 using ReleaseTool.Features.Groups.Models.Dtos;
 using ReleaseTool.Features.Tags.Models.DataAccess;
 using ReleaseTool.Features.Tags.Models.Dtos;
+using ReleaseTool.Features.Users.Models.DataAccess;
 using ReleaseTool.Features.Users.Models.Dtos;
 
 namespace ReleaseTool.Common
@@ -132,7 +133,7 @@ namespace ReleaseTool.Common
 
         private bool EmailExists(string email, Guid id)
         {
-            return (_context.Users?.Any(x => x.EmailAddress == email && x.UserId != id)).GetValueOrDefault();
+            return (_context.Users?.Any(x => x.EmailAddress == email && x.UserId != id && x.UserStatus == UserStatus.Active)).GetValueOrDefault();
         }
         private bool UserExists(Guid id)
         {

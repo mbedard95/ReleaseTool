@@ -162,7 +162,7 @@ namespace ReleaseTool.Features.ChangeRequests
                         ChangeRequestId = changeRequestId,
                         EmailAddress = user.EmailAddress
                     });
-                    await _approvalsProvider.SendApprovalEmailAsync(user);
+                    await _approvalsProvider.SendApprovalEmailAsync(user, dto);
                 }              
             }
         }

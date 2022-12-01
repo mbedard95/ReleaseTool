@@ -78,7 +78,7 @@ namespace ReleaseTool.Controllers
 
             if (dto.Title != null)
             {
-                mapped = mapped.Where(x => x.Title.Contains(dto.Title));
+                mapped = mapped.Where(x => x.Title.Contains(dto.Title, StringComparison.OrdinalIgnoreCase));
             }
 
             if (dto.Tags.Any())
@@ -119,7 +119,7 @@ namespace ReleaseTool.Controllers
             });
             if (dto.Email != null)
             {
-                mappedList = mappedList.Where(x => x.UserEmail.Contains(dto.Email)).ToList();
+                mappedList = mappedList.Where(x => x.UserEmail.Contains(dto.Email, StringComparison.OrdinalIgnoreCase)).ToList();
             }            
 
             return mappedList.OrderByDescending(x => x.Created).ToList();
