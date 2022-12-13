@@ -10,6 +10,7 @@ using ReleaseTool.Common;
 using ReleaseTool.DataAccess;
 using ReleaseTool.Features.Comments.Models.DataAccess;
 using ReleaseTool.Features.Comments.Models.Dtos;
+using ReleaseTool.Features.Users;
 
 namespace ReleaseTool.Controllers
 {
@@ -20,25 +21,37 @@ namespace ReleaseTool.Controllers
         private readonly ReleaseToolContext _context;
         private readonly IMapper _mapper;
         private readonly IRuleValidator _validator;
+        private readonly IUsersProvider _usersProvider;
 
-        public CommentsController(ReleaseToolContext context, IMapper mapper, IRuleValidator validator)
+        public CommentsController(ReleaseToolContext context, IMapper mapper, 
+            IRuleValidator validator, IUsersProvider provider)
         {
             _context = context;
             _mapper = mapper;
             _validator = validator;
+            _usersProvider = provider;
         }
 
         // GET: api/Comments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComments(Guid? changeRequestId)
+        public async Task<ActionResult<IEnumerable<ReadCommentDto>>> GetComments(Guid? changeRequestId)
         {
-            return (changeRequestId != null) ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
+            var comments = (changeRequestId != null) ? await _context.Comments.Where(x => x.ChangeRequestId == changeRequestId).ToListAsync()
                 : await _context.Comments.ToListAsync();
+
+            var dtos = new List<ReadCommentDto>();
+            foreach (var comment in comments)
+            {
+                var dto = _mapper.Map<ReadCommentDto>(comment);
+                dto.DisplayName = _usersProvider.GetUserAttributes(comment.UserId).DisplayName;
+                dtos.Add(dto);
+            }
+            return dtos.OrderByDescending(x => x.Created).ToList();
         }
 
         // GET: api/Comments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetCommentDetails(Guid id)
+        public async Task<ActionResult<ReadCommentDto>> GetCommentDetails(Guid id)
         {
             var comment = await _context.Comments.FindAsync(id);
 
@@ -47,7 +60,10 @@ namespace ReleaseTool.Controllers
                 return NotFound();
             }
 
-            return comment;
+            var dto = _mapper.Map<ReadCommentDto>(comment);
+            dto.DisplayName = _usersProvider.GetUserAttributes(comment.UserId).DisplayName;
+            
+            return dto;
         }
 
         // PUT: api/Comments/5
@@ -99,7 +115,7 @@ namespace ReleaseTool.Controllers
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetComment", new { id = comment.CommentId }, comment);
+            return CreatedAtAction("GetCommentDetails", new { id = comment.CommentId }, comment);
         }
 
         // DELETE: api/Comments/5

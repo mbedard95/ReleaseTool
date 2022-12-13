@@ -21,7 +21,6 @@ namespace ReleaseTool.Features.ChangeRequests
         bool ChangeRequestExists(Guid id);
         ChangeRequestDetailsDto ConvertToDetailsView(ChangeRequest changeRequest);
         ChangeRequest GetNewChangeRequest(WriteChangeRequestDto dto);
-        List<ReadTagDto> GetTagNames(Guid changeRequestId);
         void SaveChangeRequestGroupMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         void SaveChangeRequestTagMaps(WriteChangeRequestDto dto, Guid changeRequestId);
         Task MergeApprovals(WriteChangeRequestDto dto, Guid changeRequestId);
@@ -45,7 +44,7 @@ namespace ReleaseTool.Features.ChangeRequests
             return (_context.ChangeRequests?.Any(e => e.ChangeRequestId == id)).GetValueOrDefault();
         }
 
-        public List<ReadTagDto> GetTagNames(Guid changeRequestId)
+        private List<ReadTagDto> GetTagNames(Guid changeRequestId)
         {
             List<ReadTagDto> tagNames = new();
             var tagMaps = _context.ChangeRequestTags.Where(x => x.ChangeRequestId == changeRequestId).ToList();
@@ -64,7 +63,7 @@ namespace ReleaseTool.Features.ChangeRequests
             return tagNames;
         }
 
-        public List<ReadGroupDto> GetGroupNames(Guid changeRequestId)
+        private List<ReadGroupDto> GetGroupNames(Guid changeRequestId)
         {
             List<ReadGroupDto> groupNames = new();
             var groupMaps = _context.ChangeRequestGroups.Where(x => x.ChangeRequestId == changeRequestId).ToList();
@@ -122,6 +121,7 @@ namespace ReleaseTool.Features.ChangeRequests
             var result = _mapper.Map<ChangeRequestDetailsDto>(changeRequest);
             result.Tags = GetTagNames(result.ChangeRequestId);
             result.Approvals = GetApprovals(result.ChangeRequestId);
+            result.UserGroups = GetGroupNames(result.ChangeRequestId);
             return result;
         }
 

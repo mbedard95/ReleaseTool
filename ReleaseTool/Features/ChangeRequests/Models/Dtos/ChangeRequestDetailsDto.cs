@@ -15,7 +15,9 @@ namespace ReleaseTool.Features.ChangeRequests.Models.Dtos
         public ChangeRequestStatus ChangeRequestStatus { get; set; }
         public DateTime Created { get; set; }
         public Guid UserId { get; set; }
+        public Guid? DeployedUserId { get; set; }
         public List<ReadTagDto> Tags { get; set; } = new List<ReadTagDto>();
         public List<ReadApprovalDto> Approvals { get; set; } = new List<ReadApprovalDto>();
+        public List<ReadGroupDto> UserGroups { get; set; } = new List<ReadGroupDto>(); 
     }
 }

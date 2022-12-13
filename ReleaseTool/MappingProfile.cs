@@ -28,6 +28,7 @@ namespace ReleaseTool
             CreateMap<WriteTagDto, Tag>();
             
             CreateMap<WriteCommentDto, Comment>();
+            CreateMap<Comment, ReadCommentDto>();
             
             CreateMap<WriteApprovalDto, Approval>();
             CreateMap<UpdateApprovalDto, Approval>();

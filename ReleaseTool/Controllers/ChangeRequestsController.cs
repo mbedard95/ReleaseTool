@@ -58,6 +58,10 @@ namespace ReleaseTool.Controllers
                 var attributes = _usersProvider.GetUserAttributes(x.UserId);
                 x.UserDisplayName = attributes.DisplayName;
                 x.UserEmail = attributes.Email;
+                if (x.DeployedUserId != null)
+                {
+                    x.DeployedUserDisplayName = _usersProvider.GetUserAttributes((Guid)x.DeployedUserId).DisplayName;
+                }            
             });
 
             return mapped.OrderByDescending(x => x.Created).ToList();
@@ -137,6 +141,25 @@ namespace ReleaseTool.Controllers
             }
 
             return _changeRequestsProvider.ConvertToDetailsView(changeRequest);
+        }
+
+        [HttpPut("Status/{id}")]
+        public async Task<ActionResult> UpdateChangeRequestStatus(Guid id, UpdateChangeRequestStatusDto dto)
+        {
+            var changeRequest = await _context.ChangeRequests.FindAsync(id);
+
+            if (changeRequest == null)
+            {
+                return NotFound();
+            }
+            changeRequest.ChangeRequestStatus = dto.ChangeRequestStatus;
+            if (dto.ChangeRequestStatus == ChangeRequestStatus.Deployed)
+            {
+                changeRequest.DeployedUserId = dto.UserId;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         // PUT: api/ChangeRequests/5

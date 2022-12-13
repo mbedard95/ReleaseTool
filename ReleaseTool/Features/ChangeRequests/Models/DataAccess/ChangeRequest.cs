@@ -14,6 +14,7 @@ namespace ReleaseTool.Models
         [Required]
         public DateTime Created { get; set; }
         public Guid UserId { get; set; }
+        public Guid? DeployedUserId { get; set; }
         public ChangeRequestStatus ChangeRequestStatus { get; set; }
     }
 
